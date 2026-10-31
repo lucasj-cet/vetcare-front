@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>VetCare · Fluxo do sistema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --teal: #087f76; --teal-d: #065f58; --teal-l: #e3f3f1; --teal-xl: #f2faf9;
+    --ink: #12312e; --ink-2: #3d5653; --muted: #6b7f7c; --line: #d9e5e3;
+    --blue: #2563eb; --orange: #ea580c; --green: #0d9488; --gray: #334155; --red: #dc2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: Inter, system-ui, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; background: #fff; }
+  .page { width: 210mm; height: 297mm; padding: 18mm 18mm 16mm; position: relative; page-break-after: always; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+  .foot { position: absolute; left: 18mm; right: 18mm; bottom: 9mm; display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
+  h2 { font-size: 20pt; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 2mm; }
+  h3 { font-size: 11.5pt; font-weight: 700; margin: 6mm 0 2mm; }
+  .lead { font-size: 11pt; color: var(--ink-2); margin-bottom: 6mm; max-width: 150mm; }
+  .num { display: inline-block; font-size: 9pt; font-weight: 700; color: var(--teal); letter-spacing: .08em; margin-bottom: 2mm; }
+  p + p { margin-top: 2mm; }
+  code { font-family: Consolas, monospace; font-size: 9pt; background: var(--teal-xl); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; }
+  a { color: var(--teal-d); text-decoration: none; font-weight: 600; }
+
+  /* capa */
+  .cover { background: var(--teal); color: #fff; padding: 0; }
+  .cover .top { padding: 22mm 20mm 0; display: flex; align-items: center; gap: 4mm; font-weight: 700; font-size: 13pt; }
+  .logo { width: 12mm; height: 12mm; border-radius: 3mm; background: #fff; display: grid; place-items: center; }
+  .cover h1 { font-size: 46pt; line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; padding: 22mm 20mm 0; }
+  .cover .sub { font-size: 14pt; padding: 7mm 20mm 0; max-width: 160mm; opacity: .92; line-height: 1.45; }
+  .cover .shot { position: absolute; left: 20mm; right: -30mm; top: 128mm; bottom: 30mm; border-radius: 4mm; overflow: hidden; box-shadow: 0 12mm 30mm rgba(0,0,0,.28); border: 1.2mm solid rgba(255,255,255,.18); }
+  .cover .shot img { display: block; width: 100%; }
+  .cover .meta { position: absolute; left: 20mm; right: 20mm; bottom: 13mm; display: flex; gap: 12mm; font-size: 9pt; }
+  .cover .meta b { display: block; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .1em; opacity: .7; font-weight: 600; margin-bottom: 1mm; }
+
+  /* tabelas */
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th { text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding: 2mm 3mm; border-bottom: 1.5px solid var(--ink); }
+  td { padding: 2mm 3mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { font-weight: 600; }
+  .tag { display: inline-block; font-size: 7.5pt; font-weight: 700; padding: .4mm 2mm; border-radius: 10mm; white-space: nowrap; }
+  .ok { background: #dcf5ee; color: #065f46; } .warn { background: #fdeccf; color: #92400e; } .no { background: #fde2e2; color: #991b1b; } .info { background: #e0ebfd; color: #1e40af; }
+
+  .callout { background: var(--teal-xl); border-left: 1mm solid var(--teal); padding: 4mm 5mm; border-radius: 0 2mm 2mm 0; margin-top: 6mm; font-size: 10pt; }
+  .callout b { color: var(--teal-d); }
+
+  /* perfis */
+  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .role { border: 1px solid var(--line); border-radius: 3mm; padding: 5mm; }
+  .role .h { display: flex; align-items: center; gap: 3mm; margin-bottom: 3mm; }
+  .role .av { width: 10mm; height: 10mm; border-radius: 50%; background: var(--teal-l); color: var(--teal-d); font-weight: 800; display: grid; place-items: center; font-size: 10pt; }
+  .role .h b { font-size: 12pt; display: block; line-height: 1.2; }
+  .role .h span { font-size: 8.5pt; color: var(--muted); }
+  .role ul { list-style: none; }
+  .role li { padding: 1.6mm 0; border-top: 1px solid var(--line); font-size: 9.3pt; color: var(--ink-2); }
+  .role li strong { color: var(--ink); }
+
+  /* fluxo */
+  .flow { position: relative; margin-top: 4mm; }
+  .step { display: grid; grid-template-columns: 11mm 30mm 1fr; gap: 4mm; align-items: start; padding: 3.2mm 0; position: relative; }
+  .step::before { content: ""; position: absolute; left: 5mm; top: 12mm; bottom: -3mm; width: 1px; background: var(--line); }
+  .step:last-child::before { display: none; }
+  .dot { width: 10mm; height: 10mm; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 10pt; position: relative; z-index: 1; }
+  .who { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--teal-d); padding-top: 2.6mm; }
+  .step .t { font-weight: 700; font-size: 10.5pt; }
+  .step .d { font-size: 9.3pt; color: var(--ink-2); }
+  .step .r { font-size: 8.5pt; color: var(--muted); margin-top: .8mm; }
+
+  /* estados */
+  .states { display: flex; align-items: center; gap: 2mm; flex-wrap: wrap; margin: 4mm 0 2mm; }
+  .st { padding: 2mm 4mm; border-radius: 2mm; font-weight: 700; font-size: 9pt; border: 1.5px solid; }
+  .arrow { color: var(--muted); font-size: 12pt; }
+
+  /* telas */
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 5mm; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; display: block; border-radius: 2mm; border: 1px solid var(--line); }
+  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 1.6mm; }
+  figcaption b { color: var(--ink); }
+  .phones { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 5mm; align-items: start; }
+  .phones > * { min-width: 0; } .phones img { width: 100%; display: block; border-radius: 4mm; border: 1px solid var(--line); }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; }
+  ol.next { padding-left: 5mm; } ol.next li { margin-bottom: 2.4mm; font-size: 9.8pt; }
+  ol.next li::marker { color: var(--teal); font-weight: 800; }
+</style>
+</head>
+<body>
+
+<!-- 1 · CAPA -->
+<section class="page cover">
+  <div class="top"><div class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#087f76" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12.572l-7.5 7.428l-7.5-7.428a5 5 0 1 1 7.5-6.566a5 5 0 1 1 7.5 6.572"/></svg></div>VetCare</div>
+  <h1>Fluxo do<br>sistema VetCare</h1>
+  <p class="sub">Como a clínica funciona no front-end novo: os quatro perfis, o caminho de uma consulta do pedido ao caixa, e o que falta para ligar na API.</p>
+  <div class="shot"><img src="img/agenda.jpg" alt="Tela da agenda da recepção"></div>
+  <div class="meta">
+    <div><b>Data</b>31 de outubro de 2026</div>
+    <div><b>Repositório</b>github.com/lucasj-cet/vetcare-front</div>
+    <div><b>Escopo</b>Front-end · dados de demonstração</div>
+  </div>
+</section>
+
+<!-- 2 · REPOSITÓRIOS -->
+<section class="page">
+  <span class="num">01 · REPOSITÓRIOS</span>
+  <h2>O que foi conferido no GitHub</h2>
+  <p class="lead">Os repositórios abaixo foram só lidos. Nenhum repositório que já existia foi alterado: o front novo e este documento ficam num repositório próprio.</p>
+  <table>
+    <thead><tr><th style="width:36%">Repositório</th><th>O que tem</th><th style="width:20%">Situação</th></tr></thead>
+    <tbody>
+      <tr><td>lucasj-cet/vetcare-front</td><td>Front-end novo (React + Vite + Mantine): 15 telas, 4 perfis, camada de API pronta para trocar os dados de demonstração pela API real.</td><td><span class="tag ok">Novo · entregue</span></td></tr>
+      <tr><td>gabriela-data/ufba-vetcare</td><td>Documentação de arquitetura (UFBA): prioridades Segurança, Disponibilidade, Desempenho e Manutenibilidade; camadas por domínio; 7 ADRs.</td><td><span class="tag info">Referência · só leitura</span></td></tr>
+      <tr><td>gabriela-data/reactjs</td><td>Esqueleto React com login, contexto de autenticação, rotas e um <code>services/api.js</code>. Não traz as telas do fluxo.</td><td><span class="tag warn">Não é o front do Figma</span></td></tr>
+      <tr><td>AlexandrePMiranda/VetCare-api</td><td>API do sistema. Não está acessível publicamente (privada ou ainda não publicada).</td><td><span class="tag no">Sem acesso</span></td></tr>
+      <tr><td>Demais repositórios públicos</td><td>Projetos de outras matérias e estudos, sem relação com o VetCare.</td><td><span class="tag info">Fora do escopo</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Decisões de arquitetura (ADRs do ufba-vetcare) que o front respeita</h3>
+  <table>
+    <thead><tr><th style="width:36%">ADR</th><th>Reflexo no front</th></tr></thead>
+    <tbody>
+      <tr><td>003 · Autorização por perfil</td><td>Cada perfil vê só o seu menu e as suas rotas; o login devolve o perfil e o token.</td></tr>
+      <tr><td>004 · Hash de senhas</td><td>O front nunca guarda senha; só o token de sessão.</td></tr>
+      <tr><td>005 · Auditoria de ações</td><td>Toda ação passa por uma função de <code>src/api</code>, um ponto único para a API registrar quem fez o quê.</td></tr>
+      <tr><td>007 · Filas de tarefas</td><td>Relatórios e avisos já são tratados como "pedido → pronto", sem travar a tela.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><b>Em resumo:</b> o front-end está completo e funcional com dados de exemplo. Para ir a produção falta só a API: cada função de <code>src/api/index.js</code> já tem a rota sugerida (página 8).</div>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>2</span></div>
+</section>
+
+<!-- 3 · PERFIS -->
+<section class="page">
+  <span class="num">02 · PERFIS</span>
+  <h2>Quatro perfis, cada um com o seu trabalho</h2>
+  <p class="lead">O mesmo login leva cada pessoa direto para a tela de que ela precisa. Os menus mostram só o que aquele perfil pode fazer.</p>
+  <div class="roles">
+    <div class="role"><div class="h"><div class="av">R</div><div><b>Recepção</b><span>Entra na Agenda</span></div></div>
+      <ul>
+        <li><strong>Agenda</strong> · linha do tempo por veterinário (dia e semana), pedidos do portal, chegada, remarcar, cancelar.</li>
+        <li><strong>Cadastros</strong> · tutores e pacientes, busca, cadastro tutor + pet de uma vez, edição e exclusão.</li>
+        <li><strong>Caixa</strong> · cobranças a receber, pagamentos do dia, baixa com troco e parcelamento, lançamento avulso.</li>
+      </ul></div>
+    <div class="role"><div class="h"><div class="av">V</div><div><b>Veterinário</b><span>Entra em Atendimentos</span></div></div>
+      <ul>
+        <li><strong>Atendimentos</strong> · fila do dia e ficha: anamnese, histórico, vacinação e prescrição.</li>
+        <li><strong>Prontuários</strong> · histórico clínico, vacinas, prescrições e próximas consultas de cada paciente.</li>
+        <li><strong>Vacinas</strong> · atrasadas, próximas e aplicadas; registro de aplicação.</li>
+        <li><strong>Prescrições</strong> · rascunho, emissão e PDF.</li>
+      </ul></div>
+    <div class="role"><div class="h"><div class="av">A</div><div><b>Administrador</b><span>Entra no Dashboard</span></div></div>
+      <ul>
+        <li><strong>Dashboard</strong> · faturamento, atendimentos, ticket médio, a receber, semanas e formas de pagamento.</li>
+        <li><strong>Relatórios</strong> · geração em CSV e PDF.</li>
+        <li><strong>Usuários</strong> · convite, troca de perfil, desativação.</li>
+        <li><strong>Financeiro</strong> · receitas, despesas e saldo do mês.</li>
+      </ul></div>
+    <div class="role"><div class="h"><div class="av">T</div><div><b>Tutor</b><span>Entra em Meus pets</span></div></div>
+      <ul>
+        <li><strong>Meus pets</strong> · resumo de cada pet, próxima vacina, próximas consultas.</li>
+        <li><strong>Vacinas</strong> · carteira de vacinação e lembretes.</li>
+        <li><strong>Consultas</strong> · pedir horário, acompanhar e cancelar.</li>
+        <li><strong>Receitas</strong> · ver, compartilhar e baixar em PDF.</li>
+      </ul></div>
+  </div>
+  <div class="callout"><b>Em todos os perfis:</b> avisos (sino com contador), restaurar a demonstração e sair. No celular o menu vira uma barra inferior e as tabelas viram listas de duas linhas.</div>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>3</span></div>
+</section>
+
+<!-- 4 · FLUXO -->
+<section class="page">
+  <span class="num">03 · FLUXO PRINCIPAL</span>
+  <h2>Uma consulta, do pedido ao caixa</h2>
+  <p class="lead">Os perfis conversam entre si. Cada passo abaixo dispara o próximo sozinho, sem ninguém precisar redigitar nada.</p>
+  <div class="flow">
+    <div class="step"><div class="dot">1</div><div class="who">Tutor</div><div><div class="t">Pede a consulta pelo portal</div><div class="d">Escolhe o pet, o tipo de atendimento, o dia, o horário livre e (se quiser) o veterinário; descreve o motivo.</div><div class="r">Consulta nasce como <b>Solicitada</b> · aparece em "Pedidos dos tutores" na agenda.</div></div></div>
+    <div class="step"><div class="dot">2</div><div class="who">Recepção</div><div><div class="t">Confirma ou recusa o pedido</div><div class="d">Ao analisar, escolhe o veterinário e confirma. Também pode marcar direto pelo telefone em "Novo agendamento", que já checa horário ocupado.</div><div class="r">Vira <b>Agendada</b> · o tutor recebe o aviso.</div></div></div>
+    <div class="step"><div class="dot">3</div><div class="who">Recepção</div><div><div class="t">Marca a chegada</div><div class="d">No dia, o paciente chega e a recepção clica em "Registrar chegada" na consulta da agenda.</div><div class="r">Vira <b>Aguardando</b> · o veterinário é avisado e o paciente entra na fila dele.</div></div></div>
+    <div class="step"><div class="dot">4</div><div class="who">Veterinário</div><div><div class="t">Inicia o atendimento</div><div class="d">Abre a ficha com histórico, alergias, vacinas e sinais da última visita à vista.</div><div class="r">Vira <b>Em atendimento</b>.</div></div></div>
+    <div class="step"><div class="dot">5</div><div class="who">Veterinário</div><div><div class="t">Conclui com anamnese e prescrição</div><div class="d">Preenche queixa, exame, diagnóstico, conduta, peso e temperatura; prescreve se precisar.</div><div class="r">Vira <b>Concluída</b> · grava o <b>prontuário</b>, emite a <b>receita</b> para o tutor e gera a <b>cobrança</b> no caixa.</div></div></div>
+    <div class="step"><div class="dot">6</div><div class="who">Recepção</div><div><div class="t">Recebe no caixa</div><div class="d">A cobrança aparece em "A receber". A recepção registra forma de pagamento, troco ou parcelas.</div><div class="r">Cobrança <b>Paga</b> · entra no total do dia.</div></div></div>
+    <div class="step"><div class="dot">7</div><div class="who">Admin</div><div><div class="t">Acompanha os números</div><div class="d">Dashboard e Financeiro somam sozinhos o que o caixa recebeu; despesas entram em "Nova movimentação".</div><div class="r">Faturamento, ticket médio e saldo sempre calculados dos dados, nunca fixos.</div></div></div>
+    <div class="step"><div class="dot">8</div><div class="who">Tutor</div><div><div class="t">Vê o resultado</div><div class="d">Receita disponível em "Receitas", vacina aplicada na carteira e lembrete da próxima dose.</div></div></div>
+  </div>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>4</span></div>
+</section>
+
+<!-- 5 · ESTADOS E MODAIS -->
+<section class="page">
+  <span class="num">04 · REGRAS</span>
+  <h2>Estados da consulta e formulários</h2>
+  <p class="lead">A cor de cada estado é a mesma em todas as telas: agenda, fila do veterinário e portal do tutor.</p>
+  <div class="states">
+    <span class="st" style="color:#92400e;border-color:#f59e0b;background:#fef6e6">Solicitada</span><span class="arrow">→</span>
+    <span class="st" style="color:var(--blue);border-color:var(--blue);background:#eef4fe">Agendada</span><span class="arrow">→</span>
+    <span class="st" style="color:var(--orange);border-color:var(--orange);background:#fef1e8">Aguardando</span><span class="arrow">→</span>
+    <span class="st" style="color:var(--green);border-color:var(--green);background:#e7f7f5">Em atendimento</span><span class="arrow">→</span>
+    <span class="st" style="color:var(--gray);border-color:var(--gray);background:#f1f4f7">Concluída</span>
+  </div>
+  <p style="font-size:9.3pt;color:var(--ink-2)">Saídas possíveis: <span class="st" style="color:var(--red);border-color:var(--red);background:#fdeeee;padding:.6mm 2.5mm;font-size:8pt">Cancelada</span> pela recepção ou pelo tutor. Pedidos do portal recusados pela recepção também saem como Cancelada; o motivo, se informado, vai junto do aviso ao tutor.</p>
+
+  <h3>Regras que o front já aplica</h3>
+  <table>
+    <tbody>
+      <tr><td style="width:36%">Horários</td><td>Funcionamento das 8h às 18h. Só aparecem horários livres e futuros para o veterinário escolhido, já descontando a duração de cada tipo de atendimento.</td></tr>
+      <tr><td>Exclusão de tutor ou pet</td><td>Exclusão lógica (o histórico continua). Bloqueada quando há consulta marcada.</td></tr>
+      <tr><td>Alergias e condições</td><td>Destacadas na ficha de atendimento e no prontuário (ex.: alergia a dipirona).</td></tr>
+      <tr><td>Pagamento</td><td>Dinheiro calcula troco; cartão de crédito permite parcelar; o caixa fecha o total do dia por forma de pagamento.</td></tr>
+      <tr><td>Usuários</td><td>Convite por e-mail com reenvio; usuário desativado não entra.</td></tr>
+      <tr><td>Avisos</td><td>Cada perfil recebe os avisos que lhe dizem respeito (chegada para o vet, confirmação para o tutor, cobrança para a recepção).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Formulários (janelas)</h3>
+  <table>
+    <thead><tr><th style="width:36%">Formulário</th><th>Onde abre</th><th>O que faz</th></tr></thead>
+    <tbody>
+      <tr><td>Agendamento</td><td>Agenda · Portal</td><td>Tutor, pet, tipo, veterinário, dia e horário livre.</td></tr>
+      <tr><td>Cadastro tutor + pet</td><td>Cadastros</td><td>Dados do tutor e do primeiro pet num só passo.</td></tr>
+      <tr><td>Pagamento</td><td>Caixa</td><td>Forma, troco, parcelas; também lançamento avulso.</td></tr>
+      <tr><td>Aplicação de vacina</td><td>Vacinas · Ficha</td><td>Vacina, lote, data e próxima dose.</td></tr>
+      <tr><td>Prescrição</td><td>Ficha · Prescrições</td><td>Medicamentos, dose, frequência; rascunho ou emissão.</td></tr>
+      <tr><td>Movimentação</td><td>Financeiro</td><td>Receita ou despesa com categoria, valor e data.</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>5</span></div>
+</section>
+
+<!-- 6 · TELAS -->
+<section class="page">
+  <span class="num">05 · TELAS</span>
+  <h2>Como fica na prática</h2>
+  <p class="lead">Mesma identidade do protótipo do Figma, revisada para ser mais funcional: números calculados, contraste legível e uso no celular.</p>
+  <div class="shots">
+    <figure><img src="img/atendimento.jpg" alt=""><figcaption><b>Veterinário · Atendimentos.</b> Fila do dia e ficha do paciente.</figcaption></figure>
+    <figure><img src="img/prontuario.jpg" alt=""><figcaption><b>Veterinário · Prontuário.</b> Histórico clínico com sinais e conduta.</figcaption></figure>
+    <figure><img src="img/caixa.jpg" alt=""><figcaption><b>Recepção · Caixa.</b> A receber e pagamentos do dia.</figcaption></figure>
+    <figure><img src="img/cadastros.jpg" alt=""><figcaption><b>Recepção · Cadastros.</b> Tutores e pacientes com busca.</figcaption></figure>
+    <figure><img src="img/dashboard.jpg" alt=""><figcaption><b>Admin · Dashboard.</b> Indicadores e semanas calculados do caixa.</figcaption></figure>
+    <figure><img src="img/financeiro.jpg" alt=""><figcaption><b>Admin · Financeiro.</b> Receitas, despesas e saldo do mês.</figcaption></figure>
+  </div>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>6</span></div>
+</section>
+
+<!-- 7 · TUTOR + CELULAR -->
+<section class="page">
+  <span class="num">05 · TELAS</span>
+  <h2>Portal do tutor e celular</h2>
+  <p class="lead">O tutor acompanha tudo do próprio celular: pede consulta, vê a carteira de vacinas e baixa a receita.</p>
+  <div class="phones">
+    <figure><img src="img/mobile-tutor.jpg" alt=""><figcaption><b>Tutor no celular.</b> Barra inferior com as quatro áreas.</figcaption></figure>
+    <figure><img src="img/mobile-agenda.jpg" alt=""><figcaption><b>Recepção no celular.</b> Agenda e pedidos na palma da mão.</figcaption></figure>
+    <div class="role">
+      <div class="h"><div class="av">T</div><div><b>O que o tutor faz</b><span>Sem ligar para a clínica</span></div></div>
+      <ul>
+        <li><strong>Pede consulta</strong> escolhendo um horário que está livre de verdade.</li>
+        <li><strong>Acompanha</strong> se o pedido foi confirmado, e cancela se precisar.</li>
+        <li><strong>Vê a carteira</strong> de vacinas com as próximas doses.</li>
+        <li><strong>Liga lembretes</strong> antes de cada vacina vencer.</li>
+        <li><strong>Baixa a receita</strong> em PDF ou compartilha.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="shots" style="margin-top:7mm">
+    <figure><img src="img/tutor-pets.jpg" alt=""><figcaption><b>Tutor · Meus pets.</b> Pets, próximas consultas e receitas.</figcaption></figure>
+    <figure><img src="img/tutor-consultas.jpg" alt=""><figcaption><b>Tutor · Consultas.</b> Pedir, acompanhar e cancelar.</figcaption></figure>
+  </div>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>7</span></div>
+</section>
+
+<!-- 8 · API -->
+<section class="page">
+  <span class="num">06 · API</span>
+  <h2>Ligar na API: o que falta</h2>
+  <p class="lead">As telas nunca chamam a rede direto: tudo passa por <code>src/api/index.js</code>. Hoje essas funções respondem com dados de demonstração; para ligar, troca-se o corpo de cada uma pela chamada HTTP, mantendo o mesmo formato de resposta.</p>
+  <table>
+    <thead><tr><th style="width:30%">Etapa do fluxo</th><th style="width:35%">Função no front</th><th>Rota sugerida</th></tr></thead>
+    <tbody>
+      <tr><td>Login</td><td><code>auth.login</code></td><td><code>POST /auth/login</code> → token + usuário</td></tr>
+      <tr><td>Pedido do tutor</td><td><code>appointments.request</code></td><td><code>POST /appointments/requests</code></td></tr>
+      <tr><td>Horários livres</td><td><code>appointments.slots</code></td><td><code>GET /appointments/slots</code></td></tr>
+      <tr><td>Confirmar pedido</td><td><code>appointments.confirmRequest</code></td><td><code>POST /appointments/:id/confirm</code></td></tr>
+      <tr><td>Chegada / cancelar</td><td><code>appointments.setStatus</code></td><td><code>PATCH /appointments/:id/status</code></td></tr>
+      <tr><td>Iniciar atendimento</td><td><code>care.start</code></td><td><code>POST /appointments/:id/start</code></td></tr>
+      <tr><td>Concluir atendimento</td><td><code>care.finish</code></td><td><code>POST /appointments/:id/finish</code></td></tr>
+      <tr><td>Receber no caixa</td><td><code>charges.pay</code></td><td><code>POST /charges/:id/pay</code></td></tr>
+      <tr><td>Dashboard</td><td><code>dashboard.overview</code></td><td><code>GET /dashboard/overview</code></td></tr>
+      <tr><td>Financeiro</td><td><code>finance.month</code></td><td><code>GET /finance?month=</code></td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:8.5pt;color:var(--muted);margin-top:2mm">A lista completa (cerca de 45 funções, uma rota cada) está em <code>src/api/README.md</code> no repositório.</p>
+
+  <div class="cols" style="margin-top:6mm">
+    <div>
+      <h3 style="margin-top:0">Próximos passos</h3>
+      <ol class="next">
+        <li>Obter acesso ao repositório da API (VetCare-api) e o endereço do ambiente de testes.</li>
+        <li>Preencher <code>VITE_API_URL</code> no arquivo <code>.env</code>.</li>
+        <li>Trocar as funções de <code>src/api/index.js</code> pela chamada real, começando pelo login.</li>
+        <li>Trocar a tabela de preços de exemplo pela que vier do back-end.</li>
+        <li>Apagar os dados de demonstração (<code>db.js</code> e <code>seed.js</code>).</li>
+      </ol>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Rodar o front</h3>
+      <p style="font-size:9.6pt">Com Node instalado, dentro da pasta do projeto:</p>
+      <p style="margin-top:2mm"><code>npm install</code><br><code>npm run dev</code> → localhost:5181</p>
+      <p style="font-size:9.6pt;margin-top:3mm">Na tela de login, escolha o perfil de demonstração. Os dados de exemplo são fictícios e voltam ao início todo dia ou pelo botão "Restaurar demonstração".</p>
+      <p style="font-size:9.6pt;margin-top:3mm"><b>Stack:</b> React 18, Vite 5, Mantine 7, Tabler Icons, dayjs, React Router 6.</p>
+    </div>
+  </div>
+  <div class="foot"><span>VetCare · Fluxo do sistema</span><span>8</span></div>
+</section>
+
+</body>
+</html>
