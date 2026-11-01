@@ -1,17 +1,29 @@
 const esc = (s) =>
-  String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  String(s ?? "").replace(
+    /[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+  );
 
 export { esc as escapeHtml };
 
 // CSV com ";" e BOM, que abre direto no Excel em português
 export function downloadCsv(filename, header, rows) {
   const cell = (v) => {
-    const s = typeof v === 'number' ? v.toFixed(2).replace('.', ',').replace(/,00$/, '') : String(v ?? '');
+    const s =
+      typeof v === "number"
+        ? v.toFixed(2).replace(".", ",").replace(/,00$/, "")
+        : String(v ?? "");
     return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const csv = '﻿' + [header, ...rows].map((r) => r.map(cell).join(';')).join('\r\n');
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+  const csv =
+    "﻿" + [header, ...rows].map((r) => r.map(cell).join(";")).join("\r\n");
+  const url = URL.createObjectURL(
+    new Blob([csv], { type: "text/csv;charset=utf-8" }),
+  );
+  const a = Object.assign(document.createElement("a"), {
+    href: url,
+    download: filename,
+  });
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -33,12 +45,13 @@ const PRINT_CSS = `
 
 // Abre uma janela com o documento e chama a impressão (o navegador oferece "Salvar como PDF")
 export function printDocument(title, bodyHtml) {
-  const w = window.open('', '_blank', 'width=860,height=1000');
+  const w = window.open("", "_blank", "width=860,height=1000");
   if (!w) return false;
-  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(title)}</title>
+  w.document
+    .write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(title)}</title>
     <style>${PRINT_CSS}</style></head><body>
     <header><div><h1>${esc(title)}</h1><div class="muted">VetCare · Clínica veterinária</div></div>
-    <div class="muted">${new Date().toLocaleDateString('pt-BR')}</div></header>
+    <div class="muted">${new Date().toLocaleDateString("pt-BR")}</div></header>
     ${bodyHtml}
     <script>window.onload = () => { window.focus(); window.print(); };<\/script></body></html>`);
   w.document.close();
@@ -46,9 +59,17 @@ export function printDocument(title, bodyHtml) {
 }
 
 export function tableHtml(header, rows, numericCols = []) {
-  const th = header.map((h, i) => `<th class="${numericCols.includes(i) ? 'n' : ''}">${esc(h)}</th>`).join('');
+  const th = header
+    .map(
+      (h, i) =>
+        `<th class="${numericCols.includes(i) ? "n" : ""}">${esc(h)}</th>`,
+    )
+    .join("");
   const tr = rows
-    .map((r) => `<tr>${r.map((c, i) => `<td class="${numericCols.includes(i) ? 'n' : ''}">${esc(c)}</td>`).join('')}</tr>`)
-    .join('');
+    .map(
+      (r) =>
+        `<tr>${r.map((c, i) => `<td class="${numericCols.includes(i) ? "n" : ""}">${esc(c)}</td>`).join("")}</tr>`,
+    )
+    .join("");
   return `<table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
 }

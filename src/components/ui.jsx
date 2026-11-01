@@ -1,8 +1,18 @@
-import { Avatar, Badge, Button, Group, Modal, Skeleton, Stack, Table, Text } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { initials } from '../lib/format';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Group,
+  Modal,
+  Skeleton,
+  Stack,
+  Table,
+  Text,
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { initials } from "../lib/format";
 
-export const PHONE = '(max-width: 767px)';
+export const PHONE = "(max-width: 767px)";
 export const usePhone = () => useMediaQuery(PHONE);
 
 export function PageHeader({ title, finding, children }) {
@@ -24,12 +34,14 @@ export function PageHeader({ title, finding, children }) {
 // Indicadores num contêiner só, divididos por linhas finas
 export function Kpis({ items }) {
   return (
-    <div className="kpis" style={{ '--n': items.length }}>
+    <div className="kpis" style={{ "--n": items.length }}>
       {items.map((k) => (
         <div className="kpi" key={k.label}>
           <div className="kpi-label">{k.label}</div>
           <div className="kpi-value">{k.value}</div>
-          {k.hint && <div className={`kpi-hint ${k.trend ?? ''}`}>{k.hint}</div>}
+          {k.hint && (
+            <div className={`kpi-hint ${k.trend ?? ""}`}>{k.hint}</div>
+          )}
         </div>
       ))}
     </div>
@@ -38,7 +50,7 @@ export function Kpis({ items }) {
 
 export function KpisLoading({ n = 4 }) {
   return (
-    <div className="kpis" style={{ '--n': n }}>
+    <div className="kpis" style={{ "--n": n }}>
       {Array.from({ length: n }, (_, i) => (
         <div className="kpi" key={i}>
           <Skeleton height={12} width="50%" />
@@ -49,7 +61,15 @@ export function KpisLoading({ n = 4 }) {
   );
 }
 
-export function Block({ title, sub, actions, children, flush, footer, className = '' }) {
+export function Block({
+  title,
+  sub,
+  actions,
+  children,
+  flush,
+  footer,
+  className = "",
+}) {
   return (
     <section className={`block ${className}`}>
       {(title || actions) && (
@@ -71,7 +91,7 @@ export function Block({ title, sub, actions, children, flush, footer, className 
   );
 }
 
-export function Pill({ status, map, size = 'md' }) {
+export function Pill({ status, map, size = "md" }) {
   const s = map[status];
   if (!s) return null;
   return (
@@ -104,7 +124,15 @@ export function LoadingRows({ rows = 4 }) {
 
 export function ErrorState({ onRetry }) {
   return (
-    <Empty action={onRetry && <Button variant="default" size="xs" onClick={() => onRetry()}>Tentar de novo</Button>}>
+    <Empty
+      action={
+        onRetry && (
+          <Button variant="default" size="xs" onClick={() => onRetry()}>
+            Tentar de novo
+          </Button>
+        )
+      }
+    >
       Não foi possível carregar estas informações.
     </Empty>
   );
@@ -119,16 +147,30 @@ export function Async({ q, rows, children }) {
 
 export const Dash = () => <span className="faint">—</span>;
 
-export function PersonAvatar({ name, size = 32, color = 'teal' }) {
+export function PersonAvatar({ name, size = 32, color = "teal" }) {
   return (
-    <Avatar size={size} radius="xl" color={color} variant="light" style={{ flexShrink: 0 }}>
-      <span style={{ fontSize: size * 0.38, fontWeight: 600 }}>{initials(name)}</span>
+    <Avatar
+      size={size}
+      radius="xl"
+      color={color}
+      variant="light"
+      style={{ flexShrink: 0 }}
+    >
+      <span style={{ fontSize: size * 0.38, fontWeight: 600 }}>
+        {initials(name)}
+      </span>
     </Avatar>
   );
 }
 
 export function PetAvatar({ pet, size = 36 }) {
-  return <PersonAvatar name={pet?.name ?? '?'} size={size} color={pet?.species === 'Gato' ? 'grape' : 'teal'} />;
+  return (
+    <PersonAvatar
+      name={pet?.name ?? "?"}
+      size={size}
+      color={pet?.species === "Gato" ? "grape" : "teal"}
+    />
+  );
 }
 
 /**
@@ -136,16 +178,29 @@ export function PetAvatar({ pet, size = 36 }) {
  * columns: [{ key, label, render(row), num, width }]
  * mobile: { title(row), sub(row), side(row) }
  */
-export function DataTable({ columns, rows, onRowClick, empty = 'Nada por aqui.', mobile, footer, minWidth = 640 }) {
+export function DataTable({
+  columns,
+  rows,
+  onRowClick,
+  empty = "Nada por aqui.",
+  mobile,
+  footer,
+  minWidth = 640,
+}) {
   const phone = usePhone();
   if (!rows.length) return <Empty>{empty}</Empty>;
 
   if (phone && mobile) {
-    const Row = onRowClick ? 'button' : 'div';
+    const Row = onRowClick ? "button" : "div";
     return (
       <div className="mrows">
         {rows.map((r) => (
-          <Row key={r.id} className="mrow" onClick={onRowClick ? () => onRowClick(r) : undefined} type={onRowClick ? 'button' : undefined}>
+          <Row
+            key={r.id}
+            className="mrow"
+            onClick={onRowClick ? () => onRowClick(r) : undefined}
+            type={onRowClick ? "button" : undefined}
+          >
             <div className="mrow-main">
               <div className="mrow-title">{mobile.title(r)}</div>
               {mobile.sub && <div className="cell-sub">{mobile.sub(r)}</div>}
@@ -168,7 +223,11 @@ export function DataTable({ columns, rows, onRowClick, empty = 'Nada por aqui.',
         <Table.Thead>
           <Table.Tr>
             {columns.map((c) => (
-              <Table.Th key={c.key} className={c.num ? 'num' : undefined} style={c.width ? { width: c.width } : undefined}>
+              <Table.Th
+                key={c.key}
+                className={c.num ? "num" : undefined}
+                style={c.width ? { width: c.width } : undefined}
+              >
                 {c.label}
               </Table.Th>
             ))}
@@ -178,14 +237,18 @@ export function DataTable({ columns, rows, onRowClick, empty = 'Nada por aqui.',
           {rows.map((r) => (
             <Table.Tr
               key={r.id}
-              className={onRowClick ? 'clickable' : undefined}
+              className={onRowClick ? "clickable" : undefined}
               onClick={onRowClick ? () => onRowClick(r) : undefined}
               tabIndex={onRowClick ? 0 : undefined}
-              onKeyDown={onRowClick ? (e) => e.key === 'Enter' && onRowClick(r) : undefined}
+              onKeyDown={
+                onRowClick
+                  ? (e) => e.key === "Enter" && onRowClick(r)
+                  : undefined
+              }
             >
               {columns.map((c) => (
-                <Table.Td key={c.key} className={c.num ? 'num' : undefined}>
-                  {c.render ? c.render(r) : r[c.key] ?? <Dash />}
+                <Table.Td key={c.key} className={c.num ? "num" : undefined}>
+                  {c.render ? c.render(r) : (r[c.key] ?? <Dash />)}
                 </Table.Td>
               ))}
             </Table.Tr>
@@ -201,7 +264,16 @@ export function DataTable({ columns, rows, onRowClick, empty = 'Nada por aqui.',
   );
 }
 
-export function ConfirmDialog({ opened, title, children, confirmLabel = 'Excluir', color = 'red', onConfirm, onClose, loading }) {
+export function ConfirmDialog({
+  opened,
+  title,
+  children,
+  confirmLabel = "Excluir",
+  color = "red",
+  onConfirm,
+  onClose,
+  loading,
+}) {
   return (
     <Modal opened={opened} onClose={onClose} title={title} size="sm">
       <Text size="sm">{children}</Text>

@@ -1,10 +1,10 @@
-import dayjs from 'dayjs';
-import { buildSeed } from '../data/seed';
+import dayjs from "dayjs";
+import { buildSeed } from "../data/seed";
 
 // Banco de demonstração guardado no navegador. Só os serviços de src/api/index.js falam com ele.
 
-const KEY = 'vetcare.demo.v1';
-export const DATA_EVENT = 'vetcare:data';
+const KEY = "vetcare.demo.v1";
+export const DATA_EVENT = "vetcare:data";
 
 function persist(s) {
   try {
@@ -18,7 +18,7 @@ function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
     // os dados são montados em volta do dia de hoje; num novo dia, recomeçam
-    if (saved && saved.seededOn === dayjs().format('YYYY-MM-DD')) return saved;
+    if (saved && saved.seededOn === dayjs().format("YYYY-MM-DD")) return saved;
   } catch {
     /* recria abaixo */
   }
@@ -41,14 +41,22 @@ export const db = {
   all: (table) => state[table],
   find: (table, id) => state[table].find((r) => r.id === id),
   insert(table, row) {
-    const rec = { id: `${table.slice(0, 2)}${Date.now().toString(36)}${(++seq).toString(36)}`, ...row };
+    const rec = {
+      id: `${table.slice(0, 2)}${Date.now().toString(36)}${(++seq).toString(36)}`,
+      ...row,
+    };
     state = { ...state, [table]: [...state[table], rec] };
     commit();
     return rec;
   },
   update(table, id, patch) {
     let out;
-    state = { ...state, [table]: state[table].map((r) => (r.id === id ? (out = { ...r, ...patch }) : r)) };
+    state = {
+      ...state,
+      [table]: state[table].map((r) =>
+        r.id === id ? (out = { ...r, ...patch }) : r,
+      ),
+    };
     commit();
     return out;
   },

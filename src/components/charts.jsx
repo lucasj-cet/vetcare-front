@@ -1,8 +1,11 @@
-import { Text } from '@mantine/core';
-import { pct } from '../lib/format';
+import { Text } from "@mantine/core";
+import { pct } from "../lib/format";
 
 // valores do eixo e das colunas: "R$ 8,6 mil"
-const compact = (v) => (v >= 1000 ? `R$ ${(v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil` : `R$ ${Math.round(v)}`);
+const compact = (v) =>
+  v >= 1000
+    ? `R$ ${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mil`
+    : `R$ ${Math.round(v)}`;
 
 // Colunas simples em SVG: grade de 4 linhas, rótulos embaixo, valor no topo da maior e da atual
 export function ColumnChart({ data, format = compact, height = 220 }) {
@@ -16,7 +19,10 @@ export function ColumnChart({ data, format = compact, height = 220 }) {
   const plotH = H - top - bottom;
   const slot = (W - left) / data.length;
   const bw = Math.min(44, slot * 0.56);
-  const peak = data.reduce((best, d, i) => (d.value > data[best].value ? i : best), 0);
+  const peak = data.reduce(
+    (best, d, i) => (d.value > data[best].value ? i : best),
+    0,
+  );
 
   return (
     <div className="colchart">
@@ -25,7 +31,14 @@ export function ColumnChart({ data, format = compact, height = 220 }) {
           const y = top + plotH * (1 - f);
           return (
             <g key={f}>
-              <line x1={left} x2={W} y1={y} y2={y} stroke="var(--vc-line)" strokeDasharray={f === 0 ? undefined : '3 4'} />
+              <line
+                x1={left}
+                x2={W}
+                y1={y}
+                y2={y}
+                stroke="var(--vc-line)"
+                strokeDasharray={f === 0 ? undefined : "3 4"}
+              />
               {f > 0 && (
                 <text x={left - 10} y={y + 4} textAnchor="end">
                   {format(nice * f)}
@@ -41,10 +54,24 @@ export function ColumnChart({ data, format = compact, height = 220 }) {
           const showValue = i === peak || i === data.length - 1;
           return (
             <g key={d.label}>
-              <title>{`${d.label}: ${format(d.value)}${d.partial ? ' (semana em andamento)' : ''}`}</title>
-              <rect x={x} y={y} width={bw} height={Math.max(h, 1)} rx={3} fill={d.partial ? 'var(--mantine-color-teal-2)' : 'var(--vc-teal)'} />
+              <title>{`${d.label}: ${format(d.value)}${d.partial ? " (semana em andamento)" : ""}`}</title>
+              <rect
+                x={x}
+                y={y}
+                width={bw}
+                height={Math.max(h, 1)}
+                rx={3}
+                fill={
+                  d.partial ? "var(--mantine-color-teal-2)" : "var(--vc-teal)"
+                }
+              />
               {showValue && (
-                <text x={x + bw / 2} y={y - 6} textAnchor="middle" style={{ fill: 'var(--vc-ink)', fontWeight: 600 }}>
+                <text
+                  x={x + bw / 2}
+                  y={y - 6}
+                  textAnchor="middle"
+                  style={{ fill: "var(--vc-ink)", fontWeight: 600 }}
+                >
                   {format(d.value)}
                 </text>
               )}
@@ -68,7 +95,12 @@ function niceMax(v) {
 
 // Barras horizontais com rótulo, valor e participação
 export function BarList({ items, format, showShare = true }) {
-  if (!items.length) return <Text c="dimmed" size="sm">Sem dados no período.</Text>;
+  if (!items.length)
+    return (
+      <Text c="dimmed" size="sm">
+        Sem dados no período.
+      </Text>
+    );
   const max = Math.max(...items.map((i) => i.value), 1);
   return (
     <div className="barlist">
@@ -82,7 +114,10 @@ export function BarList({ items, format, showShare = true }) {
             </span>
           </div>
           <div className="barlist-track">
-            <div className="barlist-fill" style={{ width: `${(i.value / max) * 100}%` }} />
+            <div
+              className="barlist-fill"
+              style={{ width: `${(i.value / max) * 100}%` }}
+            />
           </div>
         </div>
       ))}

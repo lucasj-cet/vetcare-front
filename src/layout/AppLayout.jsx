@@ -1,41 +1,69 @@
-import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ActionIcon, Button, Drawer, Group, Indicator, Modal, Stack, Text, UnstyledButton } from '@mantine/core';
-import { IconBell, IconLogout, IconMenu2, IconRefresh } from '@tabler/icons-react';
-import dayjs from 'dayjs';
-import { api } from '../api';
-import { useSession } from '../auth/session';
-import { useApi } from '../hooks/useApi';
-import { act } from '../lib/notify';
-import { ROLE_LABEL } from '../lib/status';
-import { Empty, PersonAvatar } from '../components/ui';
-import { NAV } from './nav';
+import { useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  ActionIcon,
+  Button,
+  Drawer,
+  Group,
+  Indicator,
+  Modal,
+  Stack,
+  Text,
+  UnstyledButton,
+} from "@mantine/core";
+import {
+  IconBell,
+  IconLogout,
+  IconMenu2,
+  IconRefresh,
+} from "@tabler/icons-react";
+import dayjs from "dayjs";
+import { api } from "../api";
+import { useSession } from "../auth/session";
+import { useApi } from "../hooks/useApi";
+import { act } from "../lib/notify";
+import { ROLE_LABEL } from "../lib/status";
+import { Empty, PersonAvatar } from "../components/ui";
+import { NAV } from "./nav";
 
 export default function AppLayout() {
   const { role, user, viewer, logout } = useSession();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
   const [bell, setBell] = useState(false);
-  const notes = useApi(() => api.notifications.list(viewer), [viewer.role, viewer.userId]);
+  const notes = useApi(
+    () => api.notifications.list(viewer),
+    [viewer.role, viewer.userId],
+  );
   const unread = (notes.data ?? []).filter((n) => !n.read).length;
   const items = NAV[role];
 
   const signOut = () => {
     logout();
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
   };
   const resetDemo = async () => {
-    if (await act(api.demo.reset(), 'Dados de demonstração restaurados.')) setMenu(false);
+    if (await act(api.demo.reset(), "Dados de demonstração restaurados."))
+      setMenu(false);
   };
 
   const userRow = (
     <div className="user-row">
       <PersonAvatar name={user.name} size={32} />
       <div className="who">
-        <Text size="sm" fw={500}>{user.name}</Text>
-        <Text size="xs" c="dimmed">{role === 'tutor' ? 'Portal do tutor' : ROLE_LABEL[role]}</Text>
+        <Text size="sm" fw={500}>
+          {user.name}
+        </Text>
+        <Text size="xs" c="dimmed">
+          {role === "tutor" ? "Portal do tutor" : ROLE_LABEL[role]}
+        </Text>
       </div>
-      <ActionIcon variant="subtle" color="gray" onClick={signOut} aria-label="Sair">
+      <ActionIcon
+        variant="subtle"
+        color="gray"
+        onClick={signOut}
+        aria-label="Sair"
+      >
         <IconLogout size={17} />
       </ActionIcon>
     </div>
@@ -61,7 +89,11 @@ export default function AppLayout() {
           ))}
         </nav>
         <div style={{ flex: 1 }} />
-        <button type="button" className="side-btn" onClick={() => setBell(true)}>
+        <button
+          type="button"
+          className="side-btn"
+          onClick={() => setBell(true)}
+        >
           <IconBell size={16} stroke={1.8} />
           Avisos
           {unread > 0 && <span className="count">{unread}</span>}
@@ -78,12 +110,30 @@ export default function AppLayout() {
           <img src="/favicon.svg" alt="" />
           VetCare
         </div>
-        <Indicator disabled={!unread} label={unread} size={16} offset={6} color="teal">
-          <ActionIcon variant="subtle" color="gray" size="lg" onClick={() => setBell(true)} aria-label="Avisos">
+        <Indicator
+          disabled={!unread}
+          label={unread}
+          size={16}
+          offset={6}
+          color="teal"
+        >
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="lg"
+            onClick={() => setBell(true)}
+            aria-label="Avisos"
+          >
             <IconBell size={20} />
           </ActionIcon>
         </Indicator>
-        <ActionIcon variant="subtle" color="gray" size="lg" onClick={() => setMenu(true)} aria-label="Abrir menu">
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="lg"
+          onClick={() => setMenu(true)}
+          aria-label="Abrir menu"
+        >
           <IconMenu2 size={20} />
         </ActionIcon>
       </header>
@@ -103,19 +153,38 @@ export default function AppLayout() {
         ))}
       </nav>
 
-      <Drawer opened={menu} onClose={() => setMenu(false)} title="Menu" size="85%">
+      <Drawer
+        opened={menu}
+        onClose={() => setMenu(false)}
+        title="Menu"
+        size="85%"
+      >
         <Stack gap="xs">
           {userRow}
-          <Button variant="default" leftSection={<IconRefresh size={16} />} onClick={resetDemo}>
+          <Button
+            variant="default"
+            leftSection={<IconRefresh size={16} />}
+            onClick={resetDemo}
+          >
             Restaurar dados de demonstração
           </Button>
-          <Button variant="light" color="red" leftSection={<IconLogout size={16} />} onClick={signOut}>
+          <Button
+            variant="light"
+            color="red"
+            leftSection={<IconLogout size={16} />}
+            onClick={signOut}
+          >
             Sair
           </Button>
         </Stack>
       </Drawer>
 
-      <Modal opened={bell} onClose={() => setBell(false)} title="Avisos" size="md">
+      <Modal
+        opened={bell}
+        onClose={() => setBell(false)}
+        title="Avisos"
+        size="md"
+      >
         {(notes.data ?? []).length === 0 ? (
           <Empty>Nenhum aviso por enquanto.</Empty>
         ) : (
@@ -128,16 +197,27 @@ export default function AppLayout() {
                   if (n.to) navigate(n.to);
                 }}
                 py="sm"
-                style={{ borderTop: '1px solid var(--vc-line)' }}
+                style={{ borderTop: "1px solid var(--vc-line)" }}
               >
                 <Group gap="sm" wrap="nowrap" align="flex-start">
                   <span
                     aria-hidden
-                    style={{ width: 8, height: 8, borderRadius: 4, marginTop: 7, flexShrink: 0, background: n.read ? 'transparent' : 'var(--vc-teal)' }}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      marginTop: 7,
+                      flexShrink: 0,
+                      background: n.read ? "transparent" : "var(--vc-teal)",
+                    }}
                   />
                   <div>
-                    <Text size="sm" fw={n.read ? 400 : 500}>{n.text}</Text>
-                    <Text size="xs" c="dimmed">{dayjs(n.createdAt).format('DD/MM [às] HH:mm')}</Text>
+                    <Text size="sm" fw={n.read ? 400 : 500}>
+                      {n.text}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {dayjs(n.createdAt).format("DD/MM [às] HH:mm")}
+                    </Text>
                   </div>
                 </Group>
               </UnstyledButton>
@@ -145,8 +225,18 @@ export default function AppLayout() {
           </Stack>
         )}
         <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={() => setBell(false)}>Fechar</Button>
-          <Button disabled={!unread} onClick={() => act(api.notifications.markAllRead(viewer), 'Avisos marcados como lidos.')}>
+          <Button variant="default" onClick={() => setBell(false)}>
+            Fechar
+          </Button>
+          <Button
+            disabled={!unread}
+            onClick={() =>
+              act(
+                api.notifications.markAllRead(viewer),
+                "Avisos marcados como lidos.",
+              )
+            }
+          >
             Marcar como lidas
           </Button>
         </Group>

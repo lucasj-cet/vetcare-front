@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { DATA_EVENT } from '../api/db';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DATA_EVENT } from "../api/db";
 
 // Carrega dados de um serviço e recarrega sozinho quando algo muda em outra tela.
 export function useApi(fn, deps = []) {
-  const [state, setState] = useState({ data: undefined, loading: true, error: null });
+  const [state, setState] = useState({
+    data: undefined,
+    loading: true,
+    error: null,
+  });
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const alive = useRef(true);
