@@ -21,7 +21,6 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { api } from "../../api";
-import AppointmentModal from "../../components/AppointmentModal";
 import { PetModal, TutorModal } from "../../components/PeopleForms";
 import {
   Async,
@@ -49,7 +48,6 @@ export default function Cadastros() {
   const [petForm, setPetForm] = useState(null); // { pet?, tutorId, tutorName }
   const [openTutor, setOpenTutor] = useState(null);
   const [toDelete, setToDelete] = useState(null); // { kind, row }
-  const [schedule, setSchedule] = useState(null);
   const [deleting, submit] = useSubmit();
 
   const tutors = useApi(
@@ -382,11 +380,6 @@ export default function Cadastros() {
         tutorId={petForm?.tutorId}
         tutorName={petForm?.tutorName}
       />
-      <AppointmentModal
-        opened={!!schedule}
-        onClose={() => setSchedule(null)}
-        defaults={{ petId: schedule }}
-      />
       <ConfirmDialog
         opened={!!toDelete}
         onClose={() => setToDelete(null)}
@@ -410,14 +403,7 @@ function TutorDrawer({ id, onClose, ...handlers }) {
   );
 }
 
-function TutorDetails({
-  id,
-  onEdit,
-  onAddPet,
-  onEditPet,
-  onDelete,
-  onSchedule,
-}) {
+function TutorDetails({ id, onEdit, onAddPet, onEditPet, onDelete }) {
   const q = useApi(() => api.tutors.get(id), [id]);
   return (
     <Async q={q}>
