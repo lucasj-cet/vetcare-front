@@ -32,7 +32,6 @@ const PROFILES = [
 export default function Login() {
   const { session, login } = useSession();
   const navigate = useNavigate();
-  const [forgot, setForgot] = useState(false);
   const [autoEntry] = useState(() =>
     import.meta.env.DEV ? new URLSearchParams(window.location.search) : null,
   );
@@ -125,15 +124,6 @@ export default function Login() {
               <Button type="submit" fullWidth loading={busy} mt={4}>
                 Entrar
               </Button>
-              <Anchor
-                component="button"
-                type="button"
-                size="sm"
-                onClick={() => setForgot(true)}
-                ta="center"
-              >
-                Esqueci minha senha
-              </Anchor>
             </Stack>
           </form>
         </div>
@@ -141,58 +131,6 @@ export default function Login() {
           Ambiente de demonstração: os dados ficam guardados só neste navegador.
         </Text>
       </div>
-      <ForgotModal
-        opened={forgot}
-        onClose={() => setForgot(false)}
-        email={form.values.email}
-      />
     </div>
-  );
-}
-
-function ForgotModal({ opened, onClose, email }) {
-  return (
-    <Modal opened={opened} onClose={onClose} title="Recuperar senha" size="sm">
-      {opened && <ForgotForm onClose={onClose} email={email} />}
-    </Modal>
-  );
-}
-
-function ForgotForm({ onClose, email }) {
-  const form = useForm({
-    initialValues: { email },
-    validate: {
-      email: (v) => (isEmail(v) ? null : "Informe um e-mail válido"),
-    },
-  });
-  const [busy, submit] = useSubmit();
-  return (
-    <form
-      noValidate
-      onSubmit={form.onSubmit((v) =>
-        submit(async () => {
-          if (
-            await act(
-              api.auth.recover(v.email),
-              `Enviamos as instruções para ${v.email}.`,
-            )
-          )
-            onClose();
-        }),
-      )}
-    >
-      <Text size="sm" c="dimmed" mb="md">
-        Vamos mandar um link para você criar uma senha nova.
-      </Text>
-      <TextInput label="E-mail" type="email" {...form.getInputProps("email")} />
-      <Group justify="flex-end" mt="lg">
-        <Button variant="default" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button type="submit" loading={busy}>
-          Enviar recuperação
-        </Button>
-      </Group>
-    </form>
   );
 }
