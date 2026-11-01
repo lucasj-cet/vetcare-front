@@ -1,22 +1,20 @@
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { ROLES, useSession } from "./auth/session";
 import AppLayout from "./layout/AppLayout";
-import Login from "./pages/Login";
-import Agenda from "./pages/recepcao/Agenda";
-import Cadastros from "./pages/recepcao/Cadastros";
-import Caixa from "./pages/recepcao/Caixa";
-import Atendimentos from "./pages/vet/Atendimentos";
-import Prontuarios, { Prontuario } from "./pages/vet/Prontuarios";
-import VetVacinas from "./pages/vet/Vacinas";
-import Prescricoes from "./pages/vet/Prescricoes";
 import Dashboard from "./pages/admin/Dashboard";
+import Financeiro from "./pages/admin/Financeiro";
 import Relatorios from "./pages/admin/Relatorios";
 import Usuarios from "./pages/admin/Usuarios";
-import Financeiro from "./pages/admin/Financeiro";
-import MeusPets from "./pages/tutor/MeusPets";
-import TutorVacinas from "./pages/tutor/Vacinas";
+import Login from "./pages/Login";
+import Cadastros from "./pages/recepcao/Cadastros";
 import Consultas from "./pages/tutor/Consultas";
+import MeusPets from "./pages/tutor/MeusPets";
 import Receitas from "./pages/tutor/Receitas";
+import TutorVacinas from "./pages/tutor/Vacinas";
+import Atendimentos from "./pages/vet/Atendimentos";
+import Prescricoes from "./pages/vet/Prescricoes";
+import Prontuarios, { Prontuario } from "./pages/vet/Prontuarios";
+import VetVacinas from "./pages/vet/Vacinas";
 
 function RequireAuth() {
   const { session } = useSession();
@@ -53,9 +51,7 @@ export default function App() {
             <Route path="receitas" element={<Receitas />} />
           </Route>
           <Route path="recepcao" element={<RoleGate role="recepcao" />}>
-            <Route path="agenda" element={<Agenda />} />
             <Route path="cadastros" element={<Cadastros />} />
-            <Route path="caixa" element={<Caixa />} />
           </Route>
           <Route path="vet" element={<RoleGate role="vet" />}>
             <Route path="atendimentos" element={<Atendimentos />} />

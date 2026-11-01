@@ -24,9 +24,7 @@ export const NAV = {
     { to: "/tutor/receitas", label: "Receitas", icon: IconFileText },
   ],
   recepcao: [
-    { to: "/recepcao/agenda", label: "Agenda", icon: IconCalendarTime },
     { to: "/recepcao/cadastros", label: "Cadastros", icon: IconUsers },
-    { to: "/recepcao/caixa", label: "Caixa", icon: IconCash },
   ],
   vet: [
     { to: "/vet/atendimentos", label: "Atendimentos", icon: IconStethoscope },

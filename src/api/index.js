@@ -371,18 +371,6 @@ export const pets = {
     call(() => (id ? db.update("pets", id, data) : db.insert("pets", data))),
   remove: (id) =>
     call(() => {
-      const future = db
-        .all("appointments")
-        .some(
-          (a) =>
-            a.petId === id &&
-            a.date >= todayISO() &&
-            !["concluida", "cancelada"].includes(a.status),
-        );
-      if (future)
-        fail(
-          "Esse paciente tem consultas marcadas. Cancele ou remarque antes de excluir.",
-        );
       db.update("pets", id, { deletedAt: dayjs().format("YYYY-MM-DDTHH:mm") });
     }),
 };

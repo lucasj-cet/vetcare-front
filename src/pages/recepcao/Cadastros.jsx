@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -20,11 +19,8 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { api } from "../../api";
-import { useApi, useSubmit } from "../../hooks/useApi";
-import { act } from "../../lib/notify";
-import { age, brl, fmtDate, kg } from "../../lib/format";
-import { APPT_STATUS } from "../../lib/status";
 import AppointmentModal from "../../components/AppointmentModal";
 import { PetModal, TutorModal } from "../../components/PeopleForms";
 import {
@@ -37,13 +33,15 @@ import {
   Kpis,
   PageHeader,
   PetAvatar,
-  Pill,
 } from "../../components/ui";
+import { useApi, useSubmit } from "../../hooks/useApi";
+import { age, fmtDate, kg } from "../../lib/format";
+import { act } from "../../lib/notify";
 
-const PAGE = 8;
+const ROWS_PER_PAGE = 8;
 
 export default function Cadastros() {
-  const [tab, setTab] = useState("tutores");
+  const [tab, setTab] = useState("pacientes");
   const [search, setSearch] = useState("");
   const [debounced] = useDebouncedValue(search, 200);
   const [page, setPage] = useState(1);
@@ -65,21 +63,16 @@ export default function Cadastros() {
   );
 
   const rows = (tab === "tutores" ? tutors.data : pets.data) ?? [];
-  const pages = Math.max(1, Math.ceil(rows.length / PAGE));
-  const shown = rows.slice((page - 1) * PAGE, page * PAGE);
+  const pages = Math.max(1, Math.ceil(rows.length / ROWS_PER_PAGE));
+  const shown = rows.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
   const [allTutors, allPets] = all.data ?? [[], []];
-  const newThisMonth = allTutors.filter(
-    (t) => t.createdAt?.slice(0, 7) === new Date().toISOString().slice(0, 7),
-  ).length;
 
   const remove = () =>
     submit(async () => {
       const { kind, row } = toDelete;
       const ok = await act(
         kind === "tutor" ? api.tutors.remove(row.id) : api.pets.remove(row.id),
-        kind === "tutor"
-          ? `${row.name} foi excluído.`
-          : `${row.name} foi excluído.`,
+        `${row.name} foi excluído.`,
       );
       if (ok) {
         setToDelete(null);
@@ -133,11 +126,6 @@ export default function Cadastros() {
               label: "Pacientes",
               value: allPets.length,
               hint: `${allPets.filter((p) => p.species === "Cão").length} cães · ${allPets.filter((p) => p.species === "Gato").length} gatos`,
-            },
-            { label: "Novos no mês", value: newThisMonth },
-            {
-              label: "Com vacina atrasada",
-              value: allPets.filter((p) => p.overdue > 0).length,
             },
           ]}
         />
@@ -356,11 +344,11 @@ export default function Cadastros() {
             }
           </Async>
 
-          {rows.length > PAGE && (
+          {rows.length > ROWS_PER_PAGE && (
             <div className="block-foot">
               <Text size="sm" c="dimmed">
-                {(page - 1) * PAGE + 1}–{Math.min(page * PAGE, rows.length)} de{" "}
-                {rows.length}
+                {(page - 1) * ROWS_PER_PAGE + 1}–
+                {Math.min(page * ROWS_PER_PAGE, rows.length)} de {rows.length}
               </Text>
               <Pagination
                 value={page}
@@ -524,9 +512,6 @@ function TutorDetails({
                         </Text>
                         <Text size="xs" c="dimmed">
                           {p.breed} · {age(p.birth)} · {kg(p.weight)}
-                          {p.lastVisit
-                            ? ` · última consulta ${fmtDate(p.lastVisit)}`
-                            : ""}
                         </Text>
                         {p.alerts && (
                           <Text size="xs" c="red.8">
@@ -536,14 +521,6 @@ function TutorDetails({
                       </div>
                     </Group>
                     <Group gap={4} wrap="nowrap">
-                      <ActionIcon
-                        variant="subtle"
-                        color="gray"
-                        aria-label={`Agendar consulta para ${p.name}`}
-                        onClick={() => onSchedule(p.id)}
-                      >
-                        <IconCalendarPlus size={16} />
-                      </ActionIcon>
                       <ActionIcon
                         variant="subtle"
                         color="gray"
@@ -566,42 +543,6 @@ function TutorDetails({
               </Stack>
             )}
           </div>
-
-          <div>
-            <Text fw={600} size="sm" mb="xs">
-              Próximas consultas
-            </Text>
-            {t.upcoming.length === 0 ? (
-              <Text size="sm" c="dimmed">
-                Nenhuma consulta marcada.
-              </Text>
-            ) : (
-              t.upcoming.map((a) => (
-                <Group key={a.id} justify="space-between" py={6}>
-                  <Text size="sm">
-                    {fmtDate(a.date)} às {a.time} · {a.pet.name} · {a.type}
-                  </Text>
-                  <Pill status={a.status} map={APPT_STATUS} size="sm" />
-                </Group>
-              ))
-            )}
-          </div>
-
-          {t.pending.length > 0 && (
-            <div>
-              <Text fw={600} size="sm" mb="xs">
-                Em aberto no caixa
-              </Text>
-              {t.pending.map((c) => (
-                <Group key={c.id} justify="space-between" py={4}>
-                  <Text size="sm">{c.description}</Text>
-                  <Text size="sm" className="tnum" fw={500}>
-                    {brl(c.amount)}
-                  </Text>
-                </Group>
-              ))}
-            </div>
-          )}
         </Stack>
       )}
     </Async>
