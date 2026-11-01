@@ -39,7 +39,7 @@ import { act } from "../../lib/notify";
 const ROWS_PER_PAGE = 8;
 
 export default function Cadastros() {
-  const [tab, setTab] = useState("pacientes");
+  const [tab, setTab] = useState("tutores");
   const [search, setSearch] = useState("");
   const [debounced] = useDebouncedValue(search, 200);
   const [page, setPage] = useState(1);
