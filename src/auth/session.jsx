@@ -11,7 +11,7 @@ const KEY = "vetcare.session";
 
 export const ROLES = {
   recepcao: { label: "Recepcionista", home: "/recepcao/cadastros" },
-  admin: { label: "Administrador", home: "/admin/usuarios" },
+  admin: { label: "Administrador", home: "/admin/cadastros" },
 };
 
 const SessionContext = createContext(null);

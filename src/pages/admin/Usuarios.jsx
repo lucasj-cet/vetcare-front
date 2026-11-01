@@ -36,7 +36,7 @@ import {
   Pill,
 } from "../../components/ui";
 
-const STAFF_ROLES = ["recepcao", "vet", "admin"].map((value) => ({
+const STAFF_ROLES = ["recepcao", "admin"].map((value) => ({
   value,
   label: ROLE_LABEL[value],
 }));

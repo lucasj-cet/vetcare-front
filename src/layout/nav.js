@@ -6,7 +6,7 @@ export const NAV = {
     { to: "/recepcao/cadastros", label: "Cadastros", icon: IconUsers },
   ],
   admin: [
-    { to: "/admin/usuarios", label: "Usuários", icon: IconUserShield },
     { to: "/admin/cadastros", label: "Cadastros", icon: IconUsers },
+    { to: "/admin/usuarios", label: "Usuários", icon: IconUserShield },
   ],
 };

@@ -1,10 +1,5 @@
-import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
 import {
-  Anchor,
   Button,
-  Group,
-  Modal,
   PasswordInput,
   Select,
   Stack,
@@ -12,11 +7,13 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { ROLES, useSession } from "../auth/session";
 import { useSubmit } from "../hooks/useApi";
-import { act, toast } from "../lib/notify";
 import { isEmail } from "../lib/format";
+import { toast } from "../lib/notify";
 
 // e-mail de exemplo de cada perfil da demonstração
 const DEMO_EMAIL = {
