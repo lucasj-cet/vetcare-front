@@ -32,7 +32,7 @@ export default function AppLayout() {
           {user.name}
         </Text>
         <Text size="xs" c="dimmed">
-          {role === "tutor" ? "Portal do tutor" : ROLE_LABEL[role]}
+          {ROLE_LABEL[role]}
         </Text>
       </div>
       <ActionIcon

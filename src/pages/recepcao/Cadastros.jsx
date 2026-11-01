@@ -313,11 +313,6 @@ export default function Cadastros() {
                             onClick: () => setPetForm({ pet: p }),
                           },
                           {
-                            label: "Agendar consulta",
-                            icon: IconCalendarPlus,
-                            onClick: () => setSchedule(p.id),
-                          },
-                          {
                             label: "Excluir",
                             icon: IconTrash,
                             color: "red",
@@ -366,7 +361,6 @@ export default function Cadastros() {
         onAddPet={(t) => setPetForm({ tutorId: t.id, tutorName: t.name })}
         onEditPet={(p) => setPetForm({ pet: p })}
         onDelete={(kind, row) => setToDelete({ kind, row })}
-        onSchedule={setSchedule}
       />
       <TutorModal
         opened={!!tutorForm}

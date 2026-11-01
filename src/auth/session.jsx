@@ -10,10 +10,8 @@ import { db } from "../api/db";
 const KEY = "vetcare.session";
 
 export const ROLES = {
-  tutor: { label: "Tutor", home: "/tutor/pets" },
   recepcao: { label: "Recepcionista", home: "/recepcao/cadastros" },
-  vet: { label: "Veterinário", home: "/vet/atendimentos" },
-  admin: { label: "Administrador", home: "/admin/dashboard" },
+  admin: { label: "Administrador", home: "/admin/usuarios" },
 };
 
 const SessionContext = createContext(null);

@@ -21,16 +21,12 @@ import { isEmail } from "../lib/format";
 // e-mail de exemplo de cada perfil da demonstração
 const DEMO_EMAIL = {
   recepcao: "ana.costa@vetcare.com.br",
-  vet: "camila.rocha@vetcare.com.br",
   admin: "renata.freitas@vetcare.com.br",
-  tutor: "marina.ribeiro@email.com",
 };
 
 const PROFILES = [
   { value: "recepcao", label: "Recepcionista" },
-  { value: "vet", label: "Veterinário" },
   { value: "admin", label: "Administrador" },
-  { value: "tutor", label: "Tutor" },
 ];
 
 export default function Login() {
