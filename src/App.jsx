@@ -37,6 +37,7 @@ export default function App() {
             <Route path="cadastros" element={<Cadastros />} />
           </Route>
           <Route path="admin" element={<RoleGate role="admin" />}>
+            <Route path="cadastros" element={<Cadastros />} />
             <Route path="usuarios" element={<Usuarios />} />
           </Route>
         </Route>
