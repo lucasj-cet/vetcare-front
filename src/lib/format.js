@@ -7,21 +7,10 @@ export const ISO = "YYYY-MM-DD";
 export const todayISO = () => dayjs().format(ISO);
 export const toISO = (d) => (d ? dayjs(d).format(ISO) : null);
 
-export const brl = (v) =>
-  (v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-// valores grandes nos indicadores: "R$ 48,2 mil"
-export const brlShort = (v) =>
-  Math.abs(v) >= 10000
-    ? `R$ ${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mil`
-    : brl(v);
-
 export const int = (v) => (v ?? 0).toLocaleString("pt-BR");
 export const pct = (v) => `${Math.round(v * 100)}%`;
 
 export const fmtDate = (d) => (d ? dayjs(d).format("DD/MM/YYYY") : "—");
-export const fmtShort = (d) => (d ? dayjs(d).format("D MMM") : "—");
-export const fmtLong = (d) => dayjs(d).format("dddd, D [de] MMMM");
 export const fmtDateTime = (d) =>
   d ? dayjs(d).format("DD/MM/YYYY [às] HH:mm") : "—";
 
