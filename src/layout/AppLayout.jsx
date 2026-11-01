@@ -1,41 +1,18 @@
+import { ActionIcon, Button, Drawer, Stack, Text } from "@mantine/core";
+import { IconLogout, IconMenu2, IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import {
-  ActionIcon,
-  Button,
-  Drawer,
-  Group,
-  Indicator,
-  Modal,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-import {
-  IconBell,
-  IconLogout,
-  IconMenu2,
-  IconRefresh,
-} from "@tabler/icons-react";
-import dayjs from "dayjs";
 import { api } from "../api";
 import { useSession } from "../auth/session";
-import { useApi } from "../hooks/useApi";
+import { PersonAvatar } from "../components/ui";
 import { act } from "../lib/notify";
 import { ROLE_LABEL } from "../lib/status";
-import { Empty, PersonAvatar } from "../components/ui";
 import { NAV } from "./nav";
 
 export default function AppLayout() {
-  const { role, user, viewer, logout } = useSession();
+  const { role, user, logout } = useSession();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
-  const [bell, setBell] = useState(false);
-  const notes = useApi(
-    () => api.notifications.list(viewer),
-    [viewer.role, viewer.userId],
-  );
-  const unread = (notes.data ?? []).filter((n) => !n.read).length;
   const items = NAV[role];
 
   const signOut = () => {
@@ -89,15 +66,7 @@ export default function AppLayout() {
           ))}
         </nav>
         <div style={{ flex: 1 }} />
-        <button
-          type="button"
-          className="side-btn"
-          onClick={() => setBell(true)}
-        >
-          <IconBell size={16} stroke={1.8} />
-          Avisos
-          {unread > 0 && <span className="count">{unread}</span>}
-        </button>
+
         <button type="button" className="side-btn" onClick={resetDemo}>
           <IconRefresh size={16} stroke={1.8} />
           Restaurar demonstração
@@ -110,23 +79,6 @@ export default function AppLayout() {
           <img src="/favicon.svg" alt="" />
           VetCare
         </div>
-        <Indicator
-          disabled={!unread}
-          label={unread}
-          size={16}
-          offset={6}
-          color="teal"
-        >
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="lg"
-            onClick={() => setBell(true)}
-            aria-label="Avisos"
-          >
-            <IconBell size={20} />
-          </ActionIcon>
-        </Indicator>
         <ActionIcon
           variant="subtle"
           color="gray"
@@ -178,69 +130,6 @@ export default function AppLayout() {
           </Button>
         </Stack>
       </Drawer>
-
-      <Modal
-        opened={bell}
-        onClose={() => setBell(false)}
-        title="Avisos"
-        size="md"
-      >
-        {(notes.data ?? []).length === 0 ? (
-          <Empty>Nenhum aviso por enquanto.</Empty>
-        ) : (
-          <Stack gap={0}>
-            {notes.data.slice(0, 8).map((n) => (
-              <UnstyledButton
-                key={n.id}
-                onClick={() => {
-                  setBell(false);
-                  if (n.to) navigate(n.to);
-                }}
-                py="sm"
-                style={{ borderTop: "1px solid var(--vc-line)" }}
-              >
-                <Group gap="sm" wrap="nowrap" align="flex-start">
-                  <span
-                    aria-hidden
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: 4,
-                      marginTop: 7,
-                      flexShrink: 0,
-                      background: n.read ? "transparent" : "var(--vc-teal)",
-                    }}
-                  />
-                  <div>
-                    <Text size="sm" fw={n.read ? 400 : 500}>
-                      {n.text}
-                    </Text>
-                    <Text size="xs" c="dimmed">
-                      {dayjs(n.createdAt).format("DD/MM [às] HH:mm")}
-                    </Text>
-                  </div>
-                </Group>
-              </UnstyledButton>
-            ))}
-          </Stack>
-        )}
-        <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={() => setBell(false)}>
-            Fechar
-          </Button>
-          <Button
-            disabled={!unread}
-            onClick={() =>
-              act(
-                api.notifications.markAllRead(viewer),
-                "Avisos marcados como lidos.",
-              )
-            }
-          >
-            Marcar como lidas
-          </Button>
-        </Group>
-      </Modal>
     </div>
   );
 }

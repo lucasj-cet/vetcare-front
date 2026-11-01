@@ -46,7 +46,6 @@ export function SessionProvider({ children }) {
       session,
       role: session?.role,
       user,
-      // quem está vendo: usado para filtrar avisos e dados do tutor
       viewer: session
         ? { role: session.role, userId: session.userId, tutorId: user?.tutorId }
         : null,

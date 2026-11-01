@@ -64,16 +64,6 @@ const withVaccineState = (v) => ({
   vet: userById(v.vetId),
 });
 
-function notify(role, text, extra = {}) {
-  db.insert("notifications", {
-    role,
-    text,
-    read: false,
-    createdAt: dayjs().format("YYYY-MM-DDTHH:mm"),
-    ...extra,
-  });
-}
-
 const overlaps = (start, dur, otherStart, otherDur) =>
   start < otherStart + otherDur && otherStart < start + dur;
 
@@ -427,19 +417,12 @@ export const appointments = {
   create: (data) =>
     call(() => {
       assertSlot(data);
-      const a = db.insert("appointments", {
+      return db.insert("appointments", {
         ...data,
         duration: DURATION[data.type] ?? 30,
         status: "agendada",
         source: "recepcao",
       });
-      const pet = petById(a.petId);
-      notify(
-        "tutor",
-        `Consulta de ${pet.name} marcada para ${dayjs(a.date).format("DD/MM")} às ${a.time}.`,
-        { tutorId: pet.tutorId, to: "/tutor/consultas" },
-      );
-      return a;
     }),
   // POST /appointments/requests (tutor pede pelo portal; a recepção confirma)
   request: (data) =>
@@ -454,11 +437,6 @@ export const appointments = {
         requestedAt: dayjs().format("YYYY-MM-DDTHH:mm"),
       });
       const pet = petById(a.petId);
-      notify(
-        "recepcao",
-        `${tutorById(pet.tutorId).name} pediu uma consulta para ${pet.name}.`,
-        { to: "/recepcao/agenda" },
-      );
       return a;
     }),
   // PUT /appointments/:id (remarcar)
@@ -474,55 +452,23 @@ export const appointments = {
     call(() => {
       const a = db.find("appointments", id);
       assertSlot({ ...a, vetId, ignoreId: id });
-      const pet = petById(a.petId);
-      return db.batch(() => {
-        notify(
-          "tutor",
-          `A recepção confirmou a consulta de ${pet.name} em ${dayjs(a.date).format("DD/MM")} às ${a.time}.`,
-          { tutorId: pet.tutorId, to: "/tutor/consultas" },
-        );
-        return db.update("appointments", id, { vetId, status: "agendada" });
-      });
+
+      return db.update("appointments", id, { vetId, status: "agendada" });
     }),
   // PATCH /appointments/:id/status
   setStatus: (id, status, reason) =>
     call(() => {
       const a = db.find("appointments", id);
-      const pet = petById(a.petId);
       return db.batch(() => {
-        if (status === "cancelada") {
-          const who =
-            a.status === "solicitada" ? "O pedido de consulta" : "A consulta";
-          notify(
-            "tutor",
-            `${who} de ${pet.name} em ${dayjs(a.date).format("DD/MM")} às ${a.time} foi cancelado${who.startsWith("A ") ? "a" : ""}.`,
-            { tutorId: pet.tutorId, to: "/tutor/consultas" },
-          );
-        }
-        if (status === "aguardando" && a.vetId)
-          notify(
-            "vet",
-            `${pet.name} chegou para ${a.type.toLowerCase()} das ${a.time}.`,
-            { userId: a.vetId, to: "/vet/atendimentos" },
-          );
         return db.update("appointments", id, { status, cancelReason: reason });
       });
     }),
   // tutor cancela pelo portal
   cancelByTutor: (id) =>
     call(() => {
-      const a = db.find("appointments", id);
-      const pet = petById(a.petId);
-      return db.batch(() => {
-        notify(
-          "recepcao",
-          `${tutorById(pet.tutorId).name} cancelou a consulta de ${pet.name} em ${dayjs(a.date).format("DD/MM")} às ${a.time}.`,
-          { to: "/recepcao/agenda" },
-        );
-        return db.update("appointments", id, {
-          status: "cancelada",
-          cancelReason: "Cancelada pelo tutor",
-        });
+      return db.update("appointments", id, {
+        status: "cancelada",
+        cancelReason: "Cancelada pelo tutor",
       });
     }),
 };
@@ -561,10 +507,6 @@ export const care = {
             date: a.date,
             status: "emitida",
           });
-          notify("tutor", `A prescrição de ${pet.name} já está disponível.`, {
-            tutorId: pet.tutorId,
-            to: "/tutor/receitas",
-          });
         }
         db.insert("charges", {
           appointmentId: id,
@@ -576,11 +518,6 @@ export const care = {
           installments: 1,
           createdAt: dayjs().format("YYYY-MM-DDTHH:mm"),
         });
-        notify(
-          "recepcao",
-          `Atendimento de ${pet.name} concluído. Cobrança enviada ao caixa.`,
-          { to: "/recepcao/caixa" },
-        );
         return db.update("appointments", id, {
           status: "concluida",
           finishedAt: dayjs().format("HH:mm"),
@@ -683,11 +620,6 @@ export const vaccines = {
             status: "agendada",
             dueAt: nextDueAt,
           });
-        notify(
-          "tutor",
-          `${name} aplicada em ${pet.name}.${nextDueAt ? ` Próxima dose: ${dayjs(nextDueAt).format("DD/MM/YYYY")}.` : ""}`,
-          { tutorId: pet.tutorId, to: "/tutor/vacinas" },
-        );
         return rec;
       });
     }),
@@ -725,19 +657,9 @@ export const prescriptions = {
   // POST /prescriptions | PUT /prescriptions/:id
   save: ({ id, ...data }) =>
     call(() => {
-      const pet = petById(data.petId);
-      return db.batch(() => {
-        const wasDraft =
-          id && db.find("prescriptions", id).status === "rascunho";
-        if (data.status === "emitida" && (!id || wasDraft))
-          notify("tutor", `A prescrição de ${pet.name} já está disponível.`, {
-            tutorId: pet.tutorId,
-            to: "/tutor/receitas",
-          });
-        return id
-          ? db.update("prescriptions", id, data)
-          : db.insert("prescriptions", { ...data, date: todayISO() });
-      });
+      return id
+        ? db.update("prescriptions", id, data)
+        : db.insert("prescriptions", { ...data, date: todayISO() });
     }),
 };
 
@@ -1078,31 +1000,6 @@ export const reports = {
     }),
 };
 
-// ============================== avisos ==============================
-const forViewer = (n, { role, tutorId, userId }) =>
-  n.role === role &&
-  (!n.tutorId || n.tutorId === tutorId) &&
-  (!n.userId || n.userId === userId);
-
-export const notifications = {
-  list: (viewer) =>
-    call(() =>
-      db
-        .all("notifications")
-        .filter((n) => forViewer(n, viewer))
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    ),
-  markAllRead: (viewer) =>
-    call(() =>
-      db.batch(() =>
-        db
-          .all("notifications")
-          .filter((n) => forViewer(n, viewer) && !n.read)
-          .forEach((n) => db.update("notifications", n.id, { read: true })),
-      ),
-    ),
-};
-
 export const demo = {
   reset: () => call(() => db.reset()),
 };
@@ -1123,6 +1020,5 @@ export const api = {
   dashboard,
   finance,
   reports,
-  notifications,
   demo,
 };

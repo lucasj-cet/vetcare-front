@@ -1008,66 +1008,6 @@ export function buildSeed() {
     },
   ];
 
-  const notifications = [
-    {
-      id: "n1",
-      role: "tutor",
-      tutorId: "t1",
-      text: "Thor tem a vacina Antirrábica prevista para daqui a 5 dias.",
-      to: "/tutor/vacinas",
-      read: false,
-      createdAt: ts(0, "07:00"),
-    },
-    {
-      id: "n2",
-      role: "tutor",
-      tutorId: "t1",
-      text: "A consulta de Thor hoje às 10:30 está confirmada com a Dra. Camila Rocha.",
-      to: "/tutor/consultas",
-      read: false,
-      createdAt: ts(-1, "18:00"),
-    },
-    {
-      id: "n3",
-      role: "recepcao",
-      text: "Marina Ribeiro pediu uma consulta para Mel.",
-      to: "/recepcao/agenda",
-      read: false,
-      createdAt: ts(-1, "20:12"),
-    },
-    {
-      id: "n4",
-      role: "recepcao",
-      text: "Carlos Mota pediu um retorno para Theo.",
-      to: "/recepcao/agenda",
-      read: false,
-      createdAt: ts(0, "07:40"),
-    },
-    {
-      id: "n5",
-      role: "vet",
-      text: "Nina, paciente das 14:00, tem alerta de alergia a dipirona.",
-      to: "/vet/atendimentos",
-      read: false,
-      createdAt: ts(0, "07:30"),
-    },
-    {
-      id: "n6",
-      role: "vet",
-      text: "3 pacientes estão com vacinas atrasadas.",
-      to: "/vet/vacinas",
-      read: false,
-      createdAt: ts(0, "07:30"),
-    },
-    {
-      id: "n7",
-      role: "admin",
-      text: "Pedro Martins ainda não aceitou o convite de acesso.",
-      to: "/admin/usuarios",
-      read: false,
-      createdAt: ts(-1, "09:00"),
-    },
-  ];
 
   return {
     seededOn: d(0),
@@ -1082,7 +1022,6 @@ export function buildSeed() {
     exams,
     movements,
     reports,
-    notifications,
     reminders: [
       {
         id: "rm1",
