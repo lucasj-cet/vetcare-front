@@ -1,20 +1,9 @@
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { ROLES, useSession } from "./auth/session";
 import AppLayout from "./layout/AppLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import Financeiro from "./pages/admin/Financeiro";
-import Relatorios from "./pages/admin/Relatorios";
 import Usuarios from "./pages/admin/Usuarios";
 import Login from "./pages/Login";
 import Cadastros from "./pages/recepcao/Cadastros";
-import Consultas from "./pages/tutor/Consultas";
-import MeusPets from "./pages/tutor/MeusPets";
-import Receitas from "./pages/tutor/Receitas";
-import TutorVacinas from "./pages/tutor/Vacinas";
-import Atendimentos from "./pages/vet/Atendimentos";
-import Prescricoes from "./pages/vet/Prescricoes";
-import Prontuarios, { Prontuario } from "./pages/vet/Prontuarios";
-import VetVacinas from "./pages/vet/Vacinas";
 
 function RequireAuth() {
   const { session } = useSession();
@@ -44,27 +33,11 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-          <Route path="tutor" element={<RoleGate role="tutor" />}>
-            <Route path="pets" element={<MeusPets />} />
-            <Route path="vacinas" element={<TutorVacinas />} />
-            <Route path="consultas" element={<Consultas />} />
-            <Route path="receitas" element={<Receitas />} />
-          </Route>
           <Route path="recepcao" element={<RoleGate role="recepcao" />}>
             <Route path="cadastros" element={<Cadastros />} />
           </Route>
-          <Route path="vet" element={<RoleGate role="vet" />}>
-            <Route path="atendimentos" element={<Atendimentos />} />
-            <Route path="prontuarios" element={<Prontuarios />} />
-            <Route path="prontuarios/:petId" element={<Prontuario />} />
-            <Route path="vacinas" element={<VetVacinas />} />
-            <Route path="prescricoes" element={<Prescricoes />} />
-          </Route>
           <Route path="admin" element={<RoleGate role="admin" />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="relatorios" element={<Relatorios />} />
             <Route path="usuarios" element={<Usuarios />} />
-            <Route path="financeiro" element={<Financeiro />} />
           </Route>
         </Route>
       </Route>
