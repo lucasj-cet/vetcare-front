@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import { onlyDigits, todayISO } from "../lib/format";
 import { db } from "./db";
+import { ENDPOINTS } from "./endpoints";
+import { http } from "./http";
 
 // ---------------------------------------------------------------------------
 // Serviços do VetCare. As telas só chamam estas funções, todas assíncronas.
@@ -42,24 +44,9 @@ function petProfile(petId) {
 // ============================== autenticação ==============================
 
 export const auth = {
-  // POST /auth/login → { token, user }
   login: ({ email, password }) =>
-    call(() => {
-      if (!password || password.length < 6) fail("E-mail ou senha incorretos.");
-      const user = db
-        .all("users")
-        .find(
-          (u) =>
-            u.email.toLowerCase() === email.trim().toLowerCase() &&
-            u.status === "ativo",
-        );
-
-      if (!user) fail("E-mail ou senha incorretos.");
-      db.update("users", user.id, {
-        lastSeen: dayjs().format("YYYY-MM-DDTHH:mm"),
-      });
-      return { role: user.role, userId: user.id };
-    }),
+    http.post(ENDPOINTS.auth.login, { email, password }),
+  me: () => http.get(ENDPOINTS.users.me),
 };
 
 // ============================== equipe ==============================
