@@ -2,6 +2,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { ROLES, useSession } from "./auth/session";
 import AppLayout from "./layout/AppLayout";
 import Usuarios from "./pages/admin/Usuarios";
+import AcceptInvite from "./pages/AcceptInvite";
 import Login from "./pages/Login";
 import Pacientes from "./pages/recepcao/Pacientes";
 
@@ -29,6 +30,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/convite/:token" element={<AcceptInvite />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route path="recepcao" element={<RoleGate role="recepcao" />}>
