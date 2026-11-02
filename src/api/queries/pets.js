@@ -53,5 +53,8 @@ const usePetMutation = (mutationFn, { onSuccess, ...options } = {}) => {
 export const useCreatePet = (options) =>
   usePetMutation(api.pets.create, options);
 
+export const useDeletePet = (options) =>
+  usePetMutation(api.pets.remove, options);
+
 export const useUpdatePet = (options) =>
   usePetMutation(({ id, ...data }) => api.pets.update(id, data), options);

@@ -36,7 +36,7 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `petOwners.get(id)`                                    | `GET /pet-owners/:id` (com `pets[]`; 404 se não existir ou foi excluído)           | Ficha do tutor               |
 | `petOwners.create(data)`                               | `POST /pet-owners` (aceita `pets[]` junto; 409 se o CPF já existir) → `PetOwner`   | Cadastro de tutor e pet      |
 | `petOwners.update(id, data)`                           | `PATCH /pet-owners/:id` com `{ name, phone, email, address }` (CPF não é editável) | Editar tutor                 |
-| `petOwners.remove(id)`                                 | `DELETE /pet-owners/:id` (409 se tiver consulta marcada)                           | Excluir tutor                |
+| `petOwners.remove(id)`                                 | `DELETE /pet-owners/:id` (exclusão lógica, inclui os pets; 404 se não existir)     | Excluir tutor                |
 | `pets.list({ search, page })`                          | `GET /pets?search=&page=` → `{ data, total, page, pageSize }` (com `petOwner`)     | Recepção › Cadastros         |
 | `pets.get(id)`                                         | `GET /pets/:id` (com `petOwner`)                                                   | Ficha do pet                 |
 | `pets.create(data)`                                    | `POST /pets` com `petOwnerId` → `Pet`                                              | Novo pet                     |

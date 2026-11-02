@@ -185,12 +185,21 @@ export const petHandlers = [
     },
   ),
 
+  http.delete(`${API_URL}${ENDPOINTS.pets.byId(":id")}`, ({ params }) => {
+    const found = findPet(params.id);
+    if (!found) return notFound("Pet not found");
+    const owner = store.petOwners.find((o) => o.id === found.petOwner.id);
+    owner.pets = owner.pets.filter((p) => p.id !== params.id);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   http.get(`${API_URL}${ENDPOINTS.pets.list}`, ({ request }) => {
     const url = new URL(request.url);
     const search = url.searchParams.get("search") ?? "";
     const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
 
     const found = store.petOwners
+      .filter((o) => !o.deletedAt)
       .flatMap(({ pets, ...petOwner }) => pets.map((p) => ({ ...p, petOwner })))
       .filter((p) => matches(search, p.name, p.breed, p.petOwner.name))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -265,12 +274,21 @@ export const petOwnerHandlers = [
     },
   ),
 
+  http.delete(`${API_URL}${ENDPOINTS.petOwners.byId(":id")}`, ({ params }) => {
+    const petOwner = store.petOwners.find((o) => o.id === params.id);
+    if (!petOwner || petOwner.deletedAt) return notFound("Pet owner not found");
+    // soft delete: hidden from lists and GET by id, pets included
+    petOwner.deletedAt = new Date().toISOString();
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   http.get(`${API_URL}${ENDPOINTS.petOwners.list}`, ({ request }) => {
     const url = new URL(request.url);
     const search = url.searchParams.get("search") ?? "";
     const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
 
     const found = store.petOwners
+      .filter((o) => !o.deletedAt)
       .filter((o) =>
         matches(search, o.name, o.cpf, o.phone, ...o.pets.map((p) => p.name)),
       )

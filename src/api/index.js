@@ -36,7 +36,6 @@ const fail = (message) => {
   throw e;
 };
 
-const alive = (r) => !r.deletedAt;
 // ============================== autenticação ==============================
 
 export const auth = {
@@ -84,16 +83,7 @@ export const petOwners = {
     fromApiPetOwner(
       await http.patch(ENDPOINTS.petOwners.byId(id), toApiUpdatePetOwner(data)),
     ),
-  remove: (id) =>
-    call(() => {
-      const pets = db.all("pets").filter((p) => p.tutorId === id && alive(p));
-
-      const stamp = dayjs().format("YYYY-MM-DDTHH:mm");
-      db.batch(() => {
-        pets.forEach((p) => db.update("pets", p.id, { deletedAt: stamp }));
-        db.update("tutors", id, { deletedAt: stamp });
-      });
-    }),
+  remove: (id) => http.delete(ENDPOINTS.petOwners.byId(id)),
 };
 
 export const pets = {
@@ -107,10 +97,7 @@ export const pets = {
     fromApiPet(await http.post(ENDPOINTS.pets.create, toApiCreatePet(data))),
   update: async (id, data) =>
     fromApiPet(await http.patch(ENDPOINTS.pets.byId(id), toApiUpdatePet(data))),
-  remove: (id) =>
-    call(() => {
-      db.update("pets", id, { deletedAt: dayjs().format("YYYY-MM-DDTHH:mm") });
-    }),
+  remove: (id) => http.delete(ENDPOINTS.pets.byId(id)),
 };
 
 export const demo = {

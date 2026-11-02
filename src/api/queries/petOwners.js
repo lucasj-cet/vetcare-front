@@ -51,3 +51,18 @@ export const useCreatePetOwner = () => {
       ]),
   });
 };
+
+export const useDeletePetOwner = ({ onSuccess, ...options } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    ...options,
+    mutationFn: api.petOwners.remove,
+    onSuccess: async (...args) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: petOwnerKeys.all }),
+        queryClient.invalidateQueries({ queryKey: petKeys.all }),
+      ]);
+      return onSuccess?.(...args);
+    },
+  });
+};

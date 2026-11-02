@@ -26,9 +26,12 @@ import {
   useQueryState,
 } from "nuqs";
 import { useState } from "react";
-import { api } from "../../api";
-import { usePetOwner, usePetOwners } from "../../api/queries/petOwners";
-import { usePets } from "../../api/queries/pets";
+import {
+  useDeletePetOwner,
+  usePetOwner,
+  usePetOwners,
+} from "../../api/queries/petOwners";
+import { useDeletePet, usePets } from "../../api/queries/pets";
 import { PetModal, PetOwnerModal } from "../../components/PeopleForms";
 import {
   Async,
@@ -41,9 +44,8 @@ import {
   PageHeader,
   PetAvatar,
 } from "../../components/ui";
-import { useSubmit } from "../../hooks/useApi";
 import { age, kg } from "../../lib/format";
-import { act } from "../../lib/notify";
+import { toast } from "../../lib/notify";
 
 const TABS = ["tutores", "pacientes"];
 
@@ -65,7 +67,20 @@ export default function Cadastros() {
   const [petForm, setPetForm] = useState(null); // { pet?, petOwnerId, petOwnerName }
   const [openPetOwner, setOpenPetOwner] = useState(null);
   const [toDelete, setToDelete] = useState(null); // { kind, row }
-  const [deleting, submit] = useSubmit();
+  const deletePetOwner = useDeletePetOwner({
+    onSuccess: (_, id) => {
+      toast.ok(`${toDelete.row.name} foi excluído.`);
+      setToDelete(null);
+      if (openPetOwner === id) setOpenPetOwner(null);
+    },
+  });
+  const deletePet = useDeletePet({
+    onSuccess: () => {
+      toast.ok(`${toDelete.row.name} foi excluído.`);
+      setToDelete(null);
+    },
+  });
+  const deleting = deletePetOwner.isPending || deletePet.isPending;
 
   const petOwners = usePetOwners({
     search: debounced,
@@ -88,20 +103,10 @@ export default function Cadastros() {
   const petOwnerRows = petOwners.data?.rows ?? [];
   const petRows = pets.data?.rows ?? [];
 
-  const remove = () =>
-    submit(async () => {
-      const { kind, row } = toDelete;
-      const ok = await act(
-        kind === "petOwner"
-          ? api.petOwners.remove(row.id)
-          : api.pets.remove(row.id),
-        `${row.name} foi excluído.`,
-      );
-      if (ok) {
-        setToDelete(null);
-        if (kind === "petOwner") setOpenPetOwner(null);
-      }
-    });
+  const remove = () => {
+    const { kind, row } = toDelete;
+    (kind === "petOwner" ? deletePetOwner : deletePet).mutate(row.id);
+  };
 
   const rowMenu = (items) => (
     <Menu position="bottom-end" withinPortal>
