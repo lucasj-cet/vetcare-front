@@ -216,10 +216,13 @@ export default function Cadastros() {
                       : "Nenhum tutor cadastrado."
                   }
                   onRowClick={(t) => setOpenPetOwner(t.id)}
+                  fixed
+                  minWidth={750}
                   columns={[
                     {
                       key: "name",
                       label: "Tutor",
+                      width: "22.5%",
                       render: (t) => (
                         <>
                           <div className="cell-main">{t.name}</div>
@@ -230,11 +233,13 @@ export default function Cadastros() {
                     {
                       key: "cpf",
                       label: "CPF",
+                      width: "22.5%",
                       render: (t) => <span className="tnum">{t.cpf}</span>,
                     },
                     {
                       key: "phone",
                       label: "Telefone",
+                      width: "22.5%",
                       render: (t) => <span className="tnum">{t.phone}</span>,
                     },
                     {
@@ -292,10 +297,12 @@ export default function Cadastros() {
                       : "Nenhum paciente cadastrado."
                   }
                   onRowClick={(p) => setOpenPetOwner(p.petOwnerId)}
+                  fixed
                   columns={[
                     {
                       key: "name",
                       label: "Paciente",
+                      width: "26%",
                       render: (p) => (
                         <Group gap="sm" wrap="nowrap">
                           <PetAvatar pet={p} size={30} />
@@ -311,12 +318,19 @@ export default function Cadastros() {
                     {
                       key: "petOwner",
                       label: "Tutor",
+                      width: "20%",
                       render: (p) => p.petOwner?.name,
                     },
-                    { key: "age", label: "Idade", render: (p) => age(p.birth) },
+                    {
+                      key: "age",
+                      label: "Idade",
+                      width: "11%",
+                      render: (p) => age(p.birth),
+                    },
                     {
                       key: "weight",
                       label: "Peso",
+                      width: "10%",
                       num: true,
                       render: (p) => kg(p.weight),
                     },
@@ -362,7 +376,7 @@ export default function Cadastros() {
                         </Text>
                       ),
                   }}
-                  minWidth={820}
+                  minWidth={640}
                 />
               )
             }

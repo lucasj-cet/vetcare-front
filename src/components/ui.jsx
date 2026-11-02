@@ -188,6 +188,7 @@ export function DataTable({
   mobile,
   footer,
   minWidth = 640,
+  fixed = false,
 }) {
   const phone = usePhone();
   if (!rows.length) return <Empty>{empty}</Empty>;
@@ -221,7 +222,11 @@ export function DataTable({
 
   return (
     <Table.ScrollContainer minWidth={minWidth} type="native">
-      <Table className="vc-table" highlightOnHover={!!onRowClick}>
+      <Table
+        className="vc-table"
+        highlightOnHover={!!onRowClick}
+        style={fixed ? { tableLayout: "fixed" } : undefined}
+      >
         <Table.Thead>
           <Table.Tr>
             {columns.map((c) => (
