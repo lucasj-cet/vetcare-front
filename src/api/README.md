@@ -1,22 +1,39 @@
 # Camada de API do front
 
 As telas **nunca** chamam `fetch` direto: elas usam as funções de `index.js` (todas devolvem `Promise`).
-Hoje essas funções respondem com os dados de demonstração guardados no navegador (`db.js` + `src/data/seed.js`).
+Tutores (`petOwners`) e pets (`pets`) já usam a API real (`http.js` + `ENDPOINTS`); em desenvolvimento as rotas são simuladas pelo MSW (`src/mocks/handlers/`). As demais funções (`staff`, `demo`) ainda respondem com os dados de demonstração guardados no navegador (`db.js` + `src/data/seed.js`).
 
-Para ligar na API real:
+As telas de tutores e pets não chamam `index.js` direto: usam os hooks do React Query em `src/api/queries/` (`usePetOwners`, `useCreatePet`, ...), que guardam as chaves de cache e invalidam as listas após cada mutação.
+
+Para ligar o restante na API real:
 
 1. Coloque o endereço da API em `.env` → `VITE_API_URL=https://...`
 2. Em `index.js`, troque o corpo de cada função por uma chamada do `http.js`, mantendo o **mesmo formato de retorno**. Exemplo:
 
 ```js
 // antes (demonstração)
-list: ({ search } = {}) => call(() => db.all('tutors')...),
+list: () => call(() => db.all('users')...),
 // depois
-list: ({ search } = {}) => http.get('/tutors', { search }),
+list: () => http.get(ENDPOINTS.users.list),
 ```
 
-3. O token é guardado em `src/auth/session.jsx` (`tokenStore.set(res.token)` no `login`); `index.js` só faz as requisições. O `http.js` já manda `Authorization: Bearer` e lança `ApiError`; o redirecionamento para `/login` em 401 fica no handler global (`ApiErrorHandler`).
+3. O token é guardado em `tokenStore` (`http.js`); `index.js` só faz as requisições. O `http.js` já manda `Authorization: Bearer` e lança `ApiError`; o redirecionamento para `/login` em 401 fica no handler global (`ApiErrorHandler`, acionado pelo `queryClient`).
 4. Quando todas as funções estiverem trocadas, apague `db.js` e `src/data/seed.js`.
+
+## Mapeamento de campos (API → telas)
+
+A tradução fica em `mappers.js`; as telas continuam usando os nomes antigos nos campos abaixo.
+
+| API                               | Telas                       |
+| --------------------------------- | --------------------------- |
+| `specie`                          | `species`                   |
+| `birthdate` (`YYYY-MM-DD`)        | `birth`                     |
+| `notes`                           | `alerts`                    |
+| `petOwner` / `petOwnerId`         | `petOwner` / `petOwnerId`   |
+| `cpf`, `phone` (só dígitos)       | mascarados para exibição    |
+| `{ data, total, page, pageSize }` | `{ rows, total, pageSize }` |
+
+Ao enviar, CPF e telefone vão só com dígitos, o CPF não é editável (o `PATCH` do tutor não o envia) e o tutor de um pet não muda (o `PATCH` do pet não envia `petOwnerId`).
 
 Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermelho da tela.
 
