@@ -29,9 +29,7 @@ const PROFILES = [
 export default function Login() {
   const { session, login } = useSession();
   const navigate = useNavigate();
-  const [autoEntry] = useState(() =>
-    import.meta.env.DEV ? new URLSearchParams(window.location.search) : null,
-  );
+
   const form = useForm({
     initialValues: {
       role: "recepcao",
@@ -44,22 +42,12 @@ export default function Login() {
         v.length >= 6 ? null : "A senha tem pelo menos 6 caracteres",
     },
   });
+
   const [busy, submit] = useSubmit();
 
-  // só em desenvolvimento: /login?entrar=vet&ir=/vet/prontuarios entra direto (usado nas capturas de tela)
-  useEffect(() => {
-    const role = autoEntry?.get("entrar");
-    if (!ROLES[role]) return;
-    api.auth
-      .login({ role, email: DEMO_EMAIL[role], password: "12345678" })
-      .then((s) => {
-        login(s);
-        navigate(autoEntry.get("ir") || ROLES[role].home, { replace: true });
-      });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (session && !autoEntry?.get("entrar"))
+  if (session) {
     return <Navigate to={ROLES[session.role].home} replace />;
+  }
 
   const onSubmit = form.onSubmit((v) =>
     submit(async () => {
