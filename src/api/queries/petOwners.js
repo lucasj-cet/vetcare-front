@@ -28,6 +28,18 @@ export const usePetOwner = (id) =>
     queryFn: () => api.petOwners.get(id),
   });
 
+export const useUpdatePetOwner = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => api.petOwners.update(id, data),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: petOwnerKeys.all }),
+        queryClient.invalidateQueries({ queryKey: petKeys.all }),
+      ]),
+  });
+};
+
 export const useCreatePetOwner = () => {
   const queryClient = useQueryClient();
   return useMutation({

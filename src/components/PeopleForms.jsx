@@ -14,7 +14,7 @@ import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
 import { api } from "../api";
-import { useCreatePetOwner } from "../api/queries/petOwners";
+import { useCreatePetOwner, useUpdatePetOwner } from "../api/queries/petOwners";
 import { useSubmit } from "../hooks/useApi";
 import { act, toast } from "../lib/notify";
 import { isEmail, maskCpf, maskPhone, onlyDigits, toISO } from "../lib/format";
@@ -132,9 +132,9 @@ function TutorForm({ onClose, tutor }) {
       pet: petRules((values) => values.withPet),
     },
   });
-  const [updating, submit] = useSubmit();
   const create = useCreatePetOwner();
-  const saving = updating || create.isPending;
+  const update = useUpdatePetOwner();
+  const saving = create.isPending || update.isPending;
   const onSubmit = form.onSubmit((v) => {
     const data = {
       name: v.name.trim(),
@@ -144,13 +144,15 @@ function TutorForm({ onClose, tutor }) {
       address: v.address.trim(),
     };
     if (tutor)
-      return submit(async () => {
-        const ok = await act(
-          api.tutors.save({ id: tutor.id, ...data }),
-          "Cadastro atualizado.",
-        );
-        if (ok) onClose();
-      });
+      return update.mutate(
+        { id: tutor.id, ...data },
+        {
+          onSuccess: () => {
+            toast.ok("Cadastro atualizado.");
+            onClose();
+          },
+        },
+      );
     create.mutate(
       { ...data, pet: v.withPet ? petPayload(v.pet) : undefined },
       {
@@ -166,6 +168,8 @@ function TutorForm({ onClose, tutor }) {
     );
   });
 
+  const isEdit = Boolean(tutor);
+
   return (
     <form onSubmit={onSubmit} noValidate>
       <SimpleGrid cols={{ base: 1, sm: 2 }}>
@@ -178,6 +182,7 @@ function TutorForm({ onClose, tutor }) {
           label="CPF"
           placeholder="000.000.000-00"
           inputMode="numeric"
+          disabled={isEdit}
           {...form.getInputProps("cpf")}
           onChange={(e) =>
             form.setFieldValue("cpf", maskCpf(e.currentTarget.value))

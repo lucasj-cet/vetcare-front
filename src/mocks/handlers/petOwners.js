@@ -183,6 +183,29 @@ export const petOwnerHandlers = [
     return HttpResponse.json(petOwner, { status: 201 });
   }),
 
+  http.patch(
+    `${API_URL}${ENDPOINTS.petOwners.byId(":id")}`,
+    async ({ params, request }) => {
+      const petOwner = store.petOwners.find((o) => o.id === params.id);
+      if (!petOwner || petOwner.deletedAt) {
+        return HttpResponse.json(
+          { statusCode: 404, message: "Pet owner not found" },
+          { status: 404 },
+        );
+      }
+
+      const { name, phone, email, address } = await request.json();
+
+      if (!name?.trim() || !email?.trim())
+        return badRequest("name and email are required");
+      if (!/^\d{10,11}$/.test(phone ?? ""))
+        return badRequest("phone must be 10 or 11 digits");
+
+      Object.assign(petOwner, { name, phone, email, address: address ?? "" });
+      return HttpResponse.json(petOwner);
+    },
+  ),
+
   http.get(`${API_URL}${ENDPOINTS.petOwners.list}`, ({ request }) => {
     const url = new URL(request.url);
     const search = url.searchParams.get("search") ?? "";

@@ -35,7 +35,7 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `petOwners.list({ search, page })`                     | `GET /pet-owners?search=&page=` → `{ data, total, page, pageSize }` (com `pets[]`)    | Recepção › Cadastros         |
 | `petOwners.get(id)`                                    | `GET /pet-owners/:id` (com `pets[]`; 404 se não existir ou foi excluído)              | Ficha do tutor               |
 | `petOwners.create(data)`                               | `POST /pet-owners` (aceita `pets[]` junto; 409 se o CPF já existir) → `PetOwner`      | Cadastro de tutor e pet      |
-| `tutors.save(data)`                                    | `PUT /tutors/:id` (vira `PATCH /pet-owners/:id`)                                      | Editar tutor                 |
+| `petOwners.update(id, data)`                           | `PATCH /pet-owners/:id` com `{ name, phone, email, address }` (CPF não é editável)    | Editar tutor                 |
 | `tutors.remove(id)`                                    | `DELETE /tutors/:id` (409 se tiver consulta marcada)                                  | Excluir tutor                |
 | `pets.list({ search, page })`                          | `GET /pets?search=&page=` → `{ data, total, page, pageSize }` (com `petOwner`)        | Recepção › Cadastros         |
 | `pets.profile(id)`                                     | `GET /pets/:id/profile` (registros, vacinas, prescrições, exames, próximas consultas) | Prontuário, Ficha, Portal    |

@@ -47,6 +47,13 @@ export const toApiCreatePetOwner = ({ pet, ...o }) => ({
   ...(pet && { pets: [toApiNewPet(pet)] }),
 });
 
+export const toApiUpdatePetOwner = (o) => ({
+  name: o.name,
+  phone: onlyDigits(o.phone),
+  email: o.email,
+  address: o.address,
+});
+
 export const fromApiPage = (res, map) => ({
   rows: res.data.map(map),
   total: res.total,

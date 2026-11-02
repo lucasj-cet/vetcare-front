@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { onlyDigits } from "../lib/format";
 import { db } from "./db";
 import { ENDPOINTS } from "./endpoints";
 import { http } from "./http";
@@ -8,6 +7,7 @@ import {
   fromApiPet,
   fromApiPetOwner,
   toApiCreatePetOwner,
+  toApiUpdatePetOwner,
 } from "./mappers";
 
 // ---------------------------------------------------------------------------
@@ -90,20 +90,13 @@ export const petOwners = {
     fromApiPetOwner(
       await http.post(ENDPOINTS.petOwners.create, toApiCreatePetOwner(data)),
     ),
+  update: async (id, data) =>
+    fromApiPetOwner(
+      await http.patch(ENDPOINTS.petOwners.byId(id), toApiUpdatePetOwner(data)),
+    ),
 };
 
 export const tutors = {
-  save: ({ id, ...data }) =>
-    call(() => {
-      const cpf = onlyDigits(data.cpf);
-      if (
-        db
-          .all("tutors")
-          .some((t) => alive(t) && t.id !== id && onlyDigits(t.cpf) === cpf)
-      )
-        fail("Já existe um tutor com esse CPF.");
-      return db.update("tutors", id, data);
-    }),
   // DELETE /tutors/:id (exclusão lógica: o histórico clínico e financeiro fica)
   remove: (id) =>
     call(() => {
