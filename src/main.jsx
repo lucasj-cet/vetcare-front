@@ -3,6 +3,7 @@ import { DatesProvider } from "@mantine/dates";
 import { Notifications } from "@mantine/notifications";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v6";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -33,13 +34,15 @@ enableMocking().then(() =>
           <BrowserRouter
             future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
           >
-            <QueryClientProvider client={queryClient}>
-              <SessionProvider>
-                <ApiErrorHandler />
-                <App />
-              </SessionProvider>
-              <ReactQueryDevtools />
-            </QueryClientProvider>
+            <NuqsAdapter>
+              <QueryClientProvider client={queryClient}>
+                <SessionProvider>
+                  <ApiErrorHandler />
+                  <App />
+                </SessionProvider>
+                <ReactQueryDevtools />
+              </QueryClientProvider>
+            </NuqsAdapter>
           </BrowserRouter>
         </DatesProvider>
       </MantineProvider>

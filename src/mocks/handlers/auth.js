@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
-import { ENDPOINTS } from "../api/endpoints";
-import { STATUS } from "../api/statusCodes";
+import { ENDPOINTS } from "../../api/endpoints";
+import { STATUS } from "../../api/statusCodes";
 
 const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
 
@@ -13,7 +13,7 @@ const USERS = [
 // the token is derived from the email so sessions survive page reloads
 const TOKEN_PREFIX = "mock-token-";
 
-export const handlers = [
+export const authHandlers = [
   http.post(`${API_URL}${ENDPOINTS.auth.login}`, async ({ request }) => {
     const { email, password } = await request.json();
     const user = USERS.find((u) => u.email === email);

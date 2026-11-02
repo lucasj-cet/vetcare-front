@@ -3,6 +3,7 @@ import { onlyDigits, todayISO } from "../lib/format";
 import { db } from "./db";
 import { ENDPOINTS } from "./endpoints";
 import { http } from "./http";
+import { fromApiPage, fromApiPetOwner } from "./mappers";
 
 // ---------------------------------------------------------------------------
 // Serviços do VetCare. As telas só chamam estas funções, todas assíncronas.
@@ -84,6 +85,14 @@ function matches(search, ...fields) {
     );
   });
 }
+
+export const petOwners = {
+  list: async ({ search, page } = {}) =>
+    fromApiPage(
+      await http.get(ENDPOINTS.petOwners.list, { search, page }),
+      fromApiPetOwner,
+    ),
+};
 
 export const tutors = {
   list: ({ search } = {}) =>
@@ -184,6 +193,7 @@ export const demo = {
 export const api = {
   auth,
   staff,
+  petOwners,
   tutors,
   pets,
   demo,

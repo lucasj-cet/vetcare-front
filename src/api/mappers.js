@@ -1,0 +1,31 @@
+import { maskCpf, maskPhone } from "../lib/format";
+
+// The API speaks `petOwner` / `specie` / `birthdate` / `notes`; the pages keep
+// the `tutor` / `species` / `birth` / `alerts` names they already use.
+
+export const fromApiPet = (p) => ({
+  id: p.id,
+  name: p.name,
+  species: p.specie,
+  breed: p.breed,
+  sex: p.sex,
+  birth: p.birthdate,
+  weight: p.weight,
+  alerts: p.notes,
+});
+
+export const fromApiPetOwner = (o) => ({
+  id: o.id,
+  name: o.name,
+  cpf: maskCpf(o.cpf),
+  phone: maskPhone(o.phone),
+  email: o.email,
+  address: o.address,
+  pets: (o.pets ?? []).map((p) => ({ ...fromApiPet(p), tutorId: o.id })),
+});
+
+export const fromApiPage = (res, map) => ({
+  rows: res.data.map(map),
+  total: res.total,
+  pageSize: res.pageSize,
+});

@@ -32,7 +32,7 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `staff.invite(data)`                                   | `POST /users/invite`                                                                  | Admin › Convidar usuário       |
 | `staff.resendInvite(id)`                               | `POST /users/:id/invite`                                                              | Admin › Usuários               |
 | `staff.update(id, patch)`                              | `PATCH /users/:id` (perfil, status)                                                   | Admin › Usuários               |
-| `tutors.list({ search })`                              | `GET /tutors?search=` (com `pets[]`)                                                  | Recepção › Cadastros           |
+| `petOwners.list({ search, page })`                     | `GET /pet-owners?search=&page=` → `{ data, total, page, pageSize }` (com `pets[]`)    | Recepção › Cadastros           |
 | `tutors.get(id)`                                       | `GET /tutors/:id` (com pets, próximas consultas, cobranças em aberto)                 | Ficha do tutor                 |
 | `tutors.save(data)`                                    | `POST /tutors` (aceita `pet` junto) · `PUT /tutors/:id`                               | Cadastro de tutor e pet        |
 | `tutors.remove(id)`                                    | `DELETE /tutors/:id` (409 se tiver consulta marcada)                                  | Excluir tutor                  |

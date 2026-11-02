@@ -18,8 +18,16 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
+import {
+  debounce,
+  parseAsInteger,
+  parseAsString,
+  parseAsStringLiteral,
+  useQueryState,
+} from "nuqs";
 import { useState } from "react";
 import { api } from "../../api";
+import { usePetOwners } from "../../api/queries/petOwners";
 import { PetModal, TutorModal } from "../../components/PeopleForms";
 import {
   Async,
@@ -37,32 +45,42 @@ import { age, fmtDate, kg } from "../../lib/format";
 import { act } from "../../lib/notify";
 
 const ROWS_PER_PAGE = 8;
+const TABS = ["tutores", "pacientes"];
 
 export default function Cadastros() {
-  const [tab, setTab] = useState("tutores");
-  const [search, setSearch] = useState("");
-  const [debounced] = useDebouncedValue(search, 200);
-  const [page, setPage] = useState(1);
-  const [tutorForm, setTutorForm] = useState(null); // { tutor? }
+  const [tab, setTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(TABS).withDefault("tutores"),
+  );
+  const [search, setSearch] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions({
+      history: "replace",
+      limitUrlUpdates: debounce(500),
+    }),
+  );
+  const [debounced] = useDebouncedValue(search, 500);
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [tutorForm, setPetOwnerForm] = useState(null); // { tutor? }
   const [petForm, setPetForm] = useState(null); // { pet?, tutorId, tutorName }
-  const [openTutor, setOpenTutor] = useState(null);
+  const [openPetOwner, setOpenPetOwner] = useState(null);
   const [toDelete, setToDelete] = useState(null); // { kind, row }
   const [deleting, submit] = useSubmit();
 
-  const tutors = useApi(
-    () => api.tutors.list({ search: debounced }),
-    [debounced],
-  );
+  const petOwners = usePetOwners({ search: debounced, page });
+  const ownersTotal = usePetOwners().data?.total;
   const pets = useApi(() => api.pets.list({ search: debounced }), [debounced]);
-  const all = useApi(
-    () => Promise.all([api.tutors.list(), api.pets.list()]),
-    [],
-  );
+  const allPets = useApi(() => api.pets.list(), []).data ?? [];
 
-  const rows = (tab === "tutores" ? tutors.data : pets.data) ?? [];
-  const pages = Math.max(1, Math.ceil(rows.length / ROWS_PER_PAGE));
-  const shown = rows.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
-  const [allTutors, allPets] = all.data ?? [[], []];
+  const isPetOwnersTab = tab === "tutores";
+  const petRows = pets.data ?? [];
+  const total = isPetOwnersTab ? (petOwners.data?.total ?? 0) : petRows.length;
+  const pageSize = isPetOwnersTab
+    ? (petOwners.data?.pageSize ?? ROWS_PER_PAGE)
+    : ROWS_PER_PAGE;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const petOwnerRows = petOwners.data?.rows ?? [];
+  const petShown = petRows.slice((page - 1) * pageSize, page * pageSize);
 
   const remove = () =>
     submit(async () => {
@@ -73,7 +91,7 @@ export default function Cadastros() {
       );
       if (ok) {
         setToDelete(null);
-        if (kind === "tutor") setOpenTutor(null);
+        if (kind === "tutor") setOpenPetOwner(null);
       }
     });
 
@@ -109,7 +127,7 @@ export default function Cadastros() {
       <PageHeader title="Cadastros" finding="Tutores e pacientes da clínica">
         <Button
           leftSection={<IconPlus size={16} />}
-          onClick={() => setTutorForm({})}
+          onClick={() => setPetOwnerForm({})}
         >
           Novo cadastro
         </Button>
@@ -118,7 +136,7 @@ export default function Cadastros() {
       <div className="stack">
         <Kpis
           items={[
-            { label: "Tutores", value: allTutors.length },
+            { label: "Tutores", value: ownersTotal ?? "—" },
             {
               label: "Pacientes",
               value: allPets.length,
@@ -166,17 +184,17 @@ export default function Cadastros() {
             </Group>
           </Tabs>
 
-          <Async q={tab === "tutores" ? tutors : pets} rows={6}>
+          <Async q={tab === "tutores" ? petOwners : pets} rows={6}>
             {() =>
               tab === "tutores" ? (
                 <DataTable
-                  rows={shown}
+                  rows={petOwnerRows}
                   empty={
                     search
                       ? `Nenhum tutor encontrado para "${search}".`
                       : "Nenhum tutor cadastrado."
                   }
-                  onRowClick={(t) => setOpenTutor(t.id)}
+                  onRowClick={(t) => setOpenPetOwner(t.id)}
                   columns={[
                     {
                       key: "name",
@@ -217,7 +235,7 @@ export default function Cadastros() {
                           {
                             label: "Editar tutor",
                             icon: IconPencil,
-                            onClick: () => setTutorForm({ tutor: t }),
+                            onClick: () => setPetOwnerForm({ tutor: t }),
                           },
                           {
                             label: "Adicionar pet",
@@ -243,13 +261,13 @@ export default function Cadastros() {
                 />
               ) : (
                 <DataTable
-                  rows={shown}
+                  rows={petShown}
                   empty={
                     search
                       ? `Nenhum paciente encontrado para "${search}".`
                       : "Nenhum paciente cadastrado."
                   }
-                  onRowClick={(p) => setOpenTutor(p.tutorId)}
+                  onRowClick={(p) => setOpenPetOwner(p.tutorId)}
                   columns={[
                     {
                       key: "name",
@@ -336,11 +354,11 @@ export default function Cadastros() {
             }
           </Async>
 
-          {rows.length > ROWS_PER_PAGE && (
+          {total > pageSize && (
             <div className="block-foot">
               <Text size="sm" c="dimmed">
-                {(page - 1) * ROWS_PER_PAGE + 1}–
-                {Math.min(page * ROWS_PER_PAGE, rows.length)} de {rows.length}
+                {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)}{" "}
+                de {total}
               </Text>
               <Pagination
                 value={page}
@@ -354,16 +372,16 @@ export default function Cadastros() {
       </div>
 
       <TutorDrawer
-        id={openTutor}
-        onClose={() => setOpenTutor(null)}
-        onEdit={(t) => setTutorForm({ tutor: t })}
+        id={openPetOwner}
+        onClose={() => setOpenPetOwner(null)}
+        onEdit={(t) => setPetOwnerForm({ tutor: t })}
         onAddPet={(t) => setPetForm({ tutorId: t.id, tutorName: t.name })}
         onEditPet={(p) => setPetForm({ pet: p })}
         onDelete={(kind, row) => setToDelete({ kind, row })}
       />
       <TutorModal
         opened={!!tutorForm}
-        onClose={() => setTutorForm(null)}
+        onClose={() => setPetOwnerForm(null)}
         tutor={tutorForm?.tutor}
       />
       <PetModal
