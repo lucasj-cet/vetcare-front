@@ -17,6 +17,8 @@ const pet = (id, name, specie, breed, sex, birthdate, weight, notes = "") => ({
   notes,
 });
 
+let nextSeedPetId = 6; // p1–p5 are written by hand below
+
 // in-memory store, shared by the owner and pet handlers
 export const store = {
   petOwners: [
@@ -79,33 +81,123 @@ export const store = {
       phone: "11954321098",
       email: "pedro.almeida@email.com",
       address: "Rua Augusta, 220 · Consolação, São Paulo",
-      pets: [],
+      pets: [pet("p5", "Pipo", "Cão", "Shih Tzu", "Macho", "2022-02-10", 6.5)],
     },
+    // 16 more owners with 25 pets: 30 pets from 20 owners in total
     ...[
-      ["Fernanda Lima", "11122233344"],
-      ["Gustavo Rocha", "22233344455"],
-      ["Helena Duarte", "33344455566"],
-      ["Igor Menezes", "44455566677"],
-      ["Juliana Castro", "55566677788"],
-      ["Lucas Teixeira", "66677788899"],
-    ].map(([name, cpf], i) => ({
+      ["Fernanda Lima", "11122233344", [["Rex", "Cão", "SRD", "Macho", 8]]],
+      [
+        "Gustavo Rocha",
+        "22233344455",
+        [
+          ["Nina", "Gato", "Persa", "Fêmea", 4.1],
+          ["Zeus", "Cão", "Pastor Alemão", "Macho", 34],
+        ],
+      ],
+      [
+        "Helena Duarte",
+        "33344455566",
+        [["Amora", "Cão", "Poodle", "Fêmea", 5]],
+      ],
+      [
+        "Igor Menezes",
+        "44455566677",
+        [
+          ["Simba", "Gato", "SRD", "Macho", 5.3],
+          ["Nala", "Gato", "SRD", "Fêmea", 3.9],
+        ],
+      ],
+      [
+        "Juliana Castro",
+        "55566677788",
+        [
+          ["Pipoca", "Cão", "Beagle", "Fêmea", 11],
+          ["Mingau", "Gato", "Ragdoll", "Macho", 6],
+        ],
+      ],
+      [
+        "Lucas Teixeira",
+        "66677788899",
+        [["Bento", "Cão", "Labrador", "Macho", 29]],
+      ],
+      [
+        "Mariana Furtado",
+        "77788899900",
+        [
+          ["Frida", "Cão", "Dachshund", "Fêmea", 7.2],
+          ["Oliver", "Gato", "Maine Coon", "Macho", 7.8],
+        ],
+      ],
+      [
+        "Nelson Barros",
+        "88899900011",
+        [["Max", "Cão", "Rottweiler", "Macho", 41]],
+      ],
+      [
+        "Olívia Ferraz",
+        "99900011122",
+        [
+          ["Bela", "Cão", "Yorkshire", "Fêmea", 3.1],
+          ["Fred", "Gato", "SRD", "Macho", 4.6],
+        ],
+      ],
+      ["Paulo Nogueira", "10120230344", [["Toby", "Cão", "Pug", "Macho", 9.4]]],
+      [
+        "Quitéria Lopes",
+        "20230340455",
+        [
+          ["Lola", "Cão", "Bulldog Francês", "Fêmea", 12],
+          ["Cleo", "Gato", "Siamês", "Fêmea", 3.6],
+        ],
+      ],
+      ["Rafael Pinto", "30340450566", [["Duque", "Cão", "Boxer", "Macho", 27]]],
+      [
+        "Sabrina Moraes",
+        "40450560677",
+        [
+          ["Maya", "Cão", "Spitz Alemão", "Fêmea", 3.4],
+          ["Tigre", "Gato", "Bengal", "Macho", 5.9],
+        ],
+      ],
+      [
+        "Tiago Vasconcelos",
+        "50560670788",
+        [["Chico", "Gato", "SRD", "Macho", 5]],
+      ],
+      [
+        "Úrsula Campos",
+        "60670780899",
+        [
+          ["Lord", "Cão", "Golden Retriever", "Macho", 33],
+          ["Safira", "Gato", "Azul Russo", "Fêmea", 4.3],
+        ],
+      ],
+      [
+        "Vinícius Prado",
+        "70780890900",
+        [
+          ["Nico", "Cão", "Schnauzer", "Macho", 8.7],
+          ["Princesa", "Cão", "Lhasa Apso", "Fêmea", 6.1],
+        ],
+      ],
+    ].map(([name, cpf, pets], i) => ({
       id: `po${i + 5}`,
       name,
       cpf,
-      phone: `1194000${String(1000 + i)}`,
+      phone: `1194000${1000 + i}`,
       email: `${name.split(" ")[0].toLowerCase()}@email.com`,
       address: "",
-      pets: [
+      pets: pets.map(([petName, specie, breed, sex, weight]) =>
         pet(
-          `p${i + 5}`,
-          ["Rex", "Nina", "Amora", "Simba", "Pipoca", "Bento"][i],
-          i % 2 ? "Gato" : "Cão",
-          "SRD",
-          "Macho",
+          `p${nextSeedPetId++}`,
+          petName,
+          specie,
+          breed,
+          sex,
           "2020-01-15",
-          8,
+          weight,
         ),
-      ],
+      ),
     })),
   ],
 };
