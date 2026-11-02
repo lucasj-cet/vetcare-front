@@ -22,7 +22,7 @@ export const queryClient = new QueryClient({
 
       notifications.show({
         message:
-          error?.data?.message ??
+          error?.apiMessage ??
           "Não foi possível concluir a ação. Tente de novo.",
         color: "red",
         withBorder: true,
