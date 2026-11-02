@@ -100,14 +100,9 @@ export const pets = {
   remove: (id) => http.delete(ENDPOINTS.pets.byId(id)),
 };
 
-export const demo = {
-  reset: () => call(() => db.reset()),
-};
-
 export const api = {
   auth,
   staff,
   petOwners,
   pets,
-  demo,
 };

@@ -1,7 +1,6 @@
 import {
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
-  IconRefresh,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
@@ -32,7 +31,6 @@ export default function Sidebar({
   items,
   collapsed,
   onToggle,
-  onResetDemo,
   footer,
 }) {
   const toggleLabel = collapsed
@@ -83,15 +81,6 @@ export default function Sidebar({
       </nav>
       <div style={{ flex: 1 }} />
 
-      <button
-        type="button"
-        className="side-btn"
-        onClick={onResetDemo}
-        title={collapsed ? "Restaurar demonstração" : undefined}
-      >
-        <IconRefresh size={16} stroke={1.8} />
-        <span className="txt">Restaurar demonstração</span>
-      </button>
       {footer}
     </aside>
   );

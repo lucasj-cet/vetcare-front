@@ -1,11 +1,9 @@
 ﻿import { ActionIcon, Button, Drawer, Stack, Text } from "@mantine/core";
-import { IconLogout, IconMenu2, IconRefresh } from "@tabler/icons-react";
+import { IconLogout, IconMenu2 } from "@tabler/icons-react";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { api } from "../api";
 import { useSession } from "../auth/session";
 import { PersonAvatar } from "../components/ui";
-import { act } from "../lib/notify";
 import { ROLE_LABEL } from "../lib/status";
 import { NAV } from "./nav";
 import Sidebar, { useSidebarCollapsed } from "./Sidebar";
@@ -20,10 +18,6 @@ export default function AppLayout() {
   const signOut = () => {
     logout();
     navigate("/login", { replace: true });
-  };
-  const resetDemo = async () => {
-    if (await act(api.demo.reset(), "Dados de demonstração restaurados."))
-      setMenu(false);
   };
 
   const userRow = (
@@ -54,7 +48,6 @@ export default function AppLayout() {
         items={items}
         collapsed={collapsed}
         onToggle={toggleCollapsed}
-        onResetDemo={resetDemo}
         footer={userRow}
       />
 
@@ -97,13 +90,6 @@ export default function AppLayout() {
       >
         <Stack gap="xs">
           {userRow}
-          <Button
-            variant="default"
-            leftSection={<IconRefresh size={16} />}
-            onClick={resetDemo}
-          >
-            Restaurar dados de demonstração
-          </Button>
           <Button
             variant="light"
             color="red"

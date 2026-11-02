@@ -72,8 +72,4 @@ export const db = {
       commit();
     }
   },
-  reset() {
-    state = buildSeed();
-    commit();
-  },
 };
