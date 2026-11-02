@@ -4,28 +4,21 @@ import {
   Drawer,
   Group,
   Loader,
-  Menu,
   Pagination,
   Stack,
-  Tabs,
   Text,
   TextInput,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
-  IconDots,
+  IconEye,
+  IconEyeOff,
   IconPencil,
   IconPlus,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import {
-  debounce,
-  parseAsInteger,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryState,
-} from "nuqs";
+import { debounce, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import {
   useDeletePetOwner,
@@ -45,17 +38,12 @@ import {
   PageHeader,
   PetAvatar,
 } from "../../components/ui";
-import { age, kg } from "../../lib/format";
+import { age, hideCpf, kg } from "../../lib/format";
 import { toast } from "../../lib/notify";
 
-const TABS = ["tutores", "pacientes"];
 const SEARCH_DEBOUNCE_MS = 500;
 
 export default function Cadastros() {
-  const [tab, setTab] = useQueryState(
-    "tab",
-    parseAsStringLiteral(TABS).withDefault("tutores"),
-  );
   const [search, setSearch] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions({
@@ -84,31 +72,20 @@ export default function Cadastros() {
   });
   const deleting = deletePetOwner.isPending || deletePet.isPending;
 
-  const petOwners = usePetOwners({
-    search: debounced,
-    page,
-    enabled: tab === "tutores",
-  });
   const ownersTotal = usePetOwners().data?.total;
-  const pets = usePets({
-    search: debounced,
-    page,
-    enabled: tab === "pacientes",
-  });
+  const pets = usePets({ search: debounced, page });
   const petsTotal = usePets().data?.total;
 
-  const current = tab === "tutores" ? petOwners : pets;
-  const total = current.data?.total ?? 0;
-  const pageSize = current.data?.pageSize;
+  const total = pets.data?.total ?? 0;
+  const pageSize = pets.data?.pageSize;
   const pages =
     total && pageSize ? Math.max(1, Math.ceil(total / pageSize)) : null;
   // after deleting the last row of the last page, fall back to the new last page
   const lastPage = pages ?? 1;
   useEffect(() => {
-    if (current.data && !current.isPlaceholderData && page > lastPage)
+    if (pets.data && !pets.isPlaceholderData && page > lastPage)
       setPage(lastPage);
-  }, [current.data, current.isPlaceholderData, page, lastPage, setPage]);
-  const petOwnerRows = petOwners.data?.rows ?? [];
+  }, [pets.data, pets.isPlaceholderData, page, lastPage, setPage]);
   const petRows = pets.data?.rows ?? [];
 
   const remove = () => {
@@ -116,32 +93,14 @@ export default function Cadastros() {
     (kind === "petOwner" ? deletePetOwner : deletePet).mutate(row.id);
   };
 
-  const rowMenu = (items) => (
-    <Menu position="bottom-end" withinPortal>
-      <Menu.Target>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          aria-label="Ações"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <IconDots size={16} />
-        </ActionIcon>
-      </Menu.Target>
-      <Menu.Dropdown onClick={(e) => e.stopPropagation()}>
-        {items.map((i) => (
-          <Menu.Item
-            key={i.label}
-            leftSection={<i.icon size={15} />}
-            color={i.color}
-            onClick={i.onClick}
-          >
-            {i.label}
-          </Menu.Item>
-        ))}
-      </Menu.Dropdown>
-    </Menu>
-  );
+  const petAlerts = (p) =>
+    p.alerts ? (
+      <Text size="sm" c="red.8">
+        {p.alerts}
+      </Text>
+    ) : (
+      <span className="faint">—</span>
+    );
 
   return (
     <>
@@ -163,223 +122,83 @@ export default function Cadastros() {
         />
 
         <Block flush>
-          <Tabs
-            value={tab}
-            onChange={(t) => {
-              setTab(t);
-              setPage(1);
-            }}
+          <Group
+            justify="flex-end"
+            px="lg"
+            py="sm"
+            gap="xs"
+            wrap="nowrap"
+            style={{ borderBottom: "1px solid var(--vc-line)" }}
           >
-            <Group
-              justify="space-between"
-              px="lg"
-              pt="sm"
-              gap="sm"
-              wrap="wrap"
-              style={{ borderBottom: "1px solid var(--vc-line)" }}
-            >
-              <Tabs.List style={{ border: 0, marginBottom: -1 }}>
-                <Tabs.Tab value="tutores">Tutores</Tabs.Tab>
-                <Tabs.Tab value="pacientes">Pacientes</Tabs.Tab>
-              </Tabs.List>
-              <Group gap="xs" wrap="nowrap" mb="sm">
-                {(current.isLoading || current.isPlaceholderData) && (
-                  <Loader size="xs" aria-label="Carregando" />
-                )}
-                <TextInput
-                  leftSection={<IconSearch size={15} />}
-                  placeholder={
-                    tab === "tutores"
-                      ? "Nome, CPF, telefone ou pet"
-                      : "Nome, raça ou tutor"
-                  }
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.currentTarget.value);
-                    setPage(1);
-                  }}
-                  w={{ base: "100%", sm: 300 }}
-                  aria-label="Buscar"
-                />
-              </Group>
-            </Group>
-          </Tabs>
+            {(pets.isLoading || pets.isPlaceholderData) && (
+              <Loader size="xs" aria-label="Carregando" />
+            )}
+            <TextInput
+              leftSection={<IconSearch size={15} />}
+              placeholder="Nome, raça, tutor ou CPF"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.currentTarget.value);
+                setPage(1);
+              }}
+              w={{ base: "100%", sm: 300 }}
+              aria-label="Buscar"
+            />
+          </Group>
 
-          <Async q={tab === "tutores" ? petOwners : pets} rows={6}>
-            {() =>
-              tab === "tutores" ? (
-                <DataTable
-                  rows={petOwnerRows}
-                  empty={
-                    search
-                      ? `Nenhum tutor encontrado para "${search}".`
-                      : "Nenhum tutor cadastrado."
-                  }
-                  onRowClick={(t) => setOpenPetOwner(t.id)}
-                  fixed
-                  minWidth={750}
-                  columns={[
-                    {
-                      key: "name",
-                      label: "Tutor",
-                      width: "22.5%",
-                      render: (t) => (
-                        <>
-                          <div className="cell-main">{t.name}</div>
-                          <div className="cell-sub">{t.email}</div>
-                        </>
-                      ),
-                    },
-                    {
-                      key: "cpf",
-                      label: "CPF",
-                      width: "22.5%",
-                      render: (t) => <span className="tnum">{t.cpf}</span>,
-                    },
-                    {
-                      key: "phone",
-                      label: "Telefone",
-                      width: "22.5%",
-                      render: (t) => <span className="tnum">{t.phone}</span>,
-                    },
-                    {
-                      key: "pets",
-                      label: "Pacientes",
-                      render: (t) =>
-                        t.pets.length ? (
-                          t.pets.map((p) => p.name).join(", ")
-                        ) : (
-                          <span className="faint">—</span>
-                        ),
-                    },
-                    {
-                      key: "act",
-                      label: "",
-                      width: 48,
-                      render: (t) =>
-                        rowMenu([
-                          {
-                            label: "Editar tutor",
-                            icon: IconPencil,
-                            onClick: () => setPetOwnerForm({ petOwner: t }),
-                          },
-                          {
-                            label: "Adicionar pet",
-                            icon: IconPlus,
-                            onClick: () =>
-                              setPetForm({
-                                petOwnerId: t.id,
-                                petOwnerName: t.name,
-                              }),
-                          },
-                          {
-                            label: "Excluir",
-                            icon: IconTrash,
-                            color: "red",
-                            onClick: () =>
-                              setToDelete({ kind: "petOwner", row: t }),
-                          },
-                        ]),
-                    },
-                  ]}
-                  mobile={{
-                    title: (t) => t.name,
-                    sub: (t) =>
-                      `${t.phone} · ${t.pets.map((p) => p.name).join(", ") || "sem pets"}`,
-                  }}
-                />
-              ) : (
-                <DataTable
-                  rows={petRows}
-                  empty={
-                    search
-                      ? `Nenhum paciente encontrado para "${search}".`
-                      : "Nenhum paciente cadastrado."
-                  }
-                  onRowClick={(p) => setOpenPetOwner(p.petOwnerId)}
-                  fixed
-                  columns={[
-                    {
-                      key: "name",
-                      label: "Paciente",
-                      width: "26%",
-                      render: (p) => (
-                        <Group gap="sm" wrap="nowrap">
-                          <PetAvatar pet={p} size={30} />
-                          <div>
-                            <div className="cell-main">{p.name}</div>
-                            <div className="cell-sub">
-                              {p.species} · {p.breed}
-                            </div>
+          <Async q={pets} rows={6}>
+            {() => (
+              <DataTable
+                rows={petRows}
+                empty={
+                  search
+                    ? `Nenhum paciente encontrado para "${search}".`
+                    : "Nenhum paciente cadastrado."
+                }
+                onRowClick={(p) => setOpenPetOwner(p.petOwnerId)}
+                fixed
+                columns={[
+                  {
+                    key: "name",
+                    label: "Paciente",
+                    width: "32%",
+                    render: (p) => (
+                      <Group gap="sm" wrap="nowrap">
+                        <PetAvatar pet={p} size={30} />
+                        <div>
+                          <div className="cell-main">{p.name}</div>
+                          <div className="cell-sub">
+                            {p.species} · {p.breed}
                           </div>
-                        </Group>
-                      ),
-                    },
-                    {
-                      key: "petOwner",
-                      label: "Tutor",
-                      width: "20%",
-                      render: (p) => p.petOwner?.name,
-                    },
-                    {
-                      key: "age",
-                      label: "Idade",
-                      width: "11%",
-                      render: (p) => age(p.birth),
-                    },
-                    {
-                      key: "weight",
-                      label: "Peso",
-                      width: "10%",
-                      num: true,
-                      render: (p) => kg(p.weight),
-                    },
-                    {
-                      key: "alerts",
-                      label: "Alertas",
-                      render: (p) =>
-                        p.alerts ? (
-                          <Text size="sm" c="red.8">
-                            {p.alerts}
-                          </Text>
-                        ) : (
-                          <span className="faint">—</span>
-                        ),
-                    },
-                    {
-                      key: "act",
-                      label: "",
-                      width: 48,
-                      render: (p) =>
-                        rowMenu([
-                          {
-                            label: "Editar pet",
-                            icon: IconPencil,
-                            onClick: () => setPetForm({ pet: p }),
-                          },
-                          {
-                            label: "Excluir",
-                            icon: IconTrash,
-                            color: "red",
-                            onClick: () => setToDelete({ kind: "pet", row: p }),
-                          },
-                        ]),
-                    },
-                  ]}
-                  mobile={{
-                    title: (p) => `${p.name} · ${p.breed}`,
-                    sub: (p) => `${p.petOwner?.name} · ${age(p.birth)}`,
-                    side: (p) =>
-                      p.alerts && (
-                        <Text size="xs" c="red.8">
-                          Alerta
-                        </Text>
-                      ),
-                  }}
-                  minWidth={640}
-                />
-              )
-            }
+                        </div>
+                      </Group>
+                    ),
+                  },
+                  {
+                    key: "petOwner",
+                    label: "Tutor",
+                    width: "28%",
+                    render: (p) => p.petOwner?.name,
+                  },
+                  {
+                    key: "alerts",
+                    label: "Alertas",
+                    render: petAlerts,
+                  },
+                ]}
+                mobile={{
+                  title: (p) => `${p.name} · ${p.breed}`,
+                  sub: (p) => `${p.petOwner?.name} · ${age(p.birth)}`,
+                  side: (p) =>
+                    p.alerts && (
+                      <Text size="xs" c="red.8">
+                        Alerta
+                      </Text>
+                    ),
+                }}
+                minWidth={560}
+              />
+            )}
           </Async>
 
           {total > pageSize && (
@@ -444,6 +263,7 @@ function PetOwnerDrawer({ id, onClose, ...handlers }) {
 
 function PetOwnerDetails({ id, onEdit, onAddPet, onEditPet, onDelete }) {
   const petOwner = usePetOwner(id);
+  const [showCpf, setShowCpf] = useState(false);
   return (
     <Async q={petOwner}>
       {(t) => (
@@ -481,7 +301,28 @@ function PetOwnerDetails({ id, onEdit, onAddPet, onEditPet, onDelete }) {
           >
             <Facts
               items={[
-                ["CPF", t.cpf],
+                [
+                  "CPF",
+                  <Group key="cpf" gap={6} wrap="nowrap">
+                    <span className="tnum">
+                      {showCpf ? t.cpf : hideCpf(t.cpf)}
+                    </span>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      size="sm"
+                      aria-label={showCpf ? "Ocultar CPF" : "Mostrar CPF"}
+                      aria-pressed={showCpf}
+                      onClick={() => setShowCpf((v) => !v)}
+                    >
+                      {showCpf ? (
+                        <IconEyeOff size={16} />
+                      ) : (
+                        <IconEye size={16} />
+                      )}
+                    </ActionIcon>
+                  </Group>,
+                ],
                 ["Telefone", t.phone],
               ]}
             />
