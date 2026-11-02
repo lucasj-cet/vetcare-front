@@ -138,7 +138,7 @@ export function ErrorState({ onRetry }) {
   );
 }
 
-// Mostra carregando / erro / conteúdo de uma consulta do useApi ou do React Query
+// Mostra carregando / erro / conteúdo de uma consulta do React Query
 export function Async({ q, rows, children }) {
   if (q.error && q.data === undefined) {
     return <ErrorState onRetry={q.reload ?? q.refetch} />;

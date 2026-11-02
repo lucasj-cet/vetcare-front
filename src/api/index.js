@@ -1,5 +1,3 @@
-import dayjs from "dayjs";
-import { db } from "./db";
 import { ENDPOINTS } from "./endpoints";
 import { http } from "./http";
 import {
@@ -13,29 +11,8 @@ import {
   toApiUpdatePetOwner,
 } from "./mappers";
 
-// ---------------------------------------------------------------------------
-// Serviços do VetCare. As telas só chamam estas funções, todas assíncronas.
-// Hoje elas leem e gravam no banco de demonstração (db.js); para ligar na API,
-// troque o corpo de cada uma por uma chamada do http.js. O README desta pasta
-// lista a rota sugerida para cada função.
-// ---------------------------------------------------------------------------
-
-const LATENCY = 150;
-const call = (fn) =>
-  new Promise((resolve, reject) =>
-    setTimeout(() => {
-      try {
-        resolve(fn());
-      } catch (e) {
-        reject(e);
-      }
-    }, LATENCY),
-  );
-const fail = (message) => {
-  const e = new Error(message);
-  e.userMessage = message;
-  throw e;
-};
+// Serviços do VetCare. As telas só chamam estas funções, todas assíncronas e
+// ligadas à API real (http.js + ENDPOINTS). O README desta pasta lista as rotas.
 
 // ============================== autenticação ==============================
 
@@ -59,28 +36,6 @@ export const users = {
   deactivate: (id) => http.post(ENDPOINTS.users.deactivate(id)),
   acceptInvite: (token, { password }) =>
     http.post(ENDPOINTS.users.acceptInvite(token), { password }),
-};
-
-// ============================== equipe (ainda simulada) ==============================
-export const staff = {
-  list: () => call(() => db.all("users").filter((u) => u.role !== "tutor")),
-  invite: ({ name, email, role, crmv }) =>
-    call(() => {
-      if (
-        db
-          .all("users")
-          .some((u) => u.email.toLowerCase() === email.toLowerCase())
-      )
-        fail("Já existe um usuário com esse e-mail.");
-      return db.insert("users", {
-        name,
-        email,
-        role,
-        status: "convite",
-        invitedAt: dayjs().format("YYYY-MM-DDTHH:mm"),
-      });
-    }),
-  update: (id, patch) => call(() => db.update("users", id, patch)),
 };
 
 // ============================== tutores e pacientes ==============================
@@ -120,7 +75,6 @@ export const pets = {
 export const api = {
   auth,
   users,
-  staff,
   petOwners,
   pets,
 };
