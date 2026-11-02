@@ -27,12 +27,7 @@ export function useSidebarCollapsed() {
   return [collapsed, toggle];
 }
 
-export default function Sidebar({
-  items,
-  collapsed,
-  onToggle,
-  footer,
-}) {
+export default function Sidebar({ items, collapsed, onToggle, footer }) {
   const toggleLabel = collapsed
     ? "Expandir barra lateral"
     : "Recolher barra lateral";

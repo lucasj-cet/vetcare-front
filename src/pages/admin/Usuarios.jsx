@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActionIcon,
   Button,
   Group,
+  Loader,
   Menu,
   Modal,
+  Pagination,
   Select,
   SimpleGrid,
+  Text,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useDebouncedValue } from "@mantine/hooks";
 import {
   IconDots,
-  IconMailForward,
   IconPlus,
-  IconUserCheck,
+  IconSearch,
   IconUserOff,
   IconUserCog,
 } from "@tabler/icons-react";
+import { debounce, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { api } from "../../api";
+import { useUsers } from "../../api/queries/users";
 import { useSession } from "../../auth/session";
-import { useApi, useSubmit } from "../../hooks/useApi";
+import { useSubmit } from "../../hooks/useApi";
 import { act } from "../../lib/notify";
 import { fmtDateTime, isEmail, relDay } from "../../lib/format";
 import { ROLE_LABEL, USER_STATUS } from "../../lib/status";
@@ -41,15 +46,36 @@ const STAFF_ROLES = ["recepcao", "admin"].map((value) => ({
   label: ROLE_LABEL[value],
 }));
 
+const SEARCH_DEBOUNCE_MS = 500;
+
 export default function Usuarios() {
   const { user: me } = useSession();
   const [invite, setInvite] = useState(false);
   const [roleFor, setRoleFor] = useState(null);
   const [deactivate, setDeactivate] = useState(null);
   const [busy, submit] = useSubmit();
-  const q = useApi(() => api.staff.list(), []);
-  const all = q.data ?? [];
-  const n = (s) => all.filter((u) => u.status === s).length;
+
+  const [search, setSearch] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions({
+      history: "replace",
+      limitUrlUpdates: debounce(SEARCH_DEBOUNCE_MS),
+    }),
+  );
+  const [debounced] = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const q = useUsers({ search: debounced, page });
+  const allTotal = useUsers().data?.total;
+
+  const total = q.data?.total ?? 0;
+  const pageSize = q.data?.pageSize;
+  const pages =
+    total && pageSize ? Math.max(1, Math.ceil(total / pageSize)) : null;
+  // when the current page no longer exists, fall back to the last one
+  const lastPage = pages ?? 1;
+  useEffect(() => {
+    if (q.data && !q.isPlaceholderData && page > lastPage) setPage(lastPage);
+  }, [q.data, q.isPlaceholderData, page, lastPage, setPage]);
 
   const setStatus = (u, status, msg) =>
     submit(async () => {
@@ -59,14 +85,7 @@ export default function Usuarios() {
 
   return (
     <>
-      <PageHeader
-        title="Usuários"
-        finding={
-          q.data
-            ? `${n("ativo")} pessoas com acesso${n("convite") ? ` · ${n("convite")} convite(s) esperando resposta` : ""}`
-            : undefined
-        }
-      >
+      <PageHeader title="Usuários" finding="Quem tem acesso ao VetCare">
         <Button
           leftSection={<IconPlus size={16} />}
           onClick={() => setInvite(true)}
@@ -75,27 +94,44 @@ export default function Usuarios() {
         </Button>
       </PageHeader>
       <div className="stack">
-        <Kpis
-          items={[
-            { label: "Ativos", value: n("ativo") },
-            { label: "Convites pendentes", value: n("convite") },
-            { label: "Desativados", value: n("inativo") },
-            {
-              label: "Veterinários",
-              value: all.filter((u) => u.role === "vet" && u.status === "ativo")
-                .length,
-            },
-          ]}
-        />
+        <Kpis items={[{ label: "Usuários", value: allTotal ?? "—" }]} />
         <Block
           title="Equipe"
           sub="Tutores entram pelo portal com o e-mail do cadastro e não aparecem aqui"
           flush
         >
+          <Group
+            justify="space-between"
+            px="lg"
+            py="sm"
+            gap="xs"
+            wrap="nowrap"
+            style={{ borderBottom: "1px solid var(--vc-line)" }}
+          >
+            <TextInput
+              leftSection={<IconSearch size={15} />}
+              placeholder="Nome ou e-mail"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.currentTarget.value);
+                setPage(1);
+              }}
+              w={{ base: "100%", sm: 300 }}
+              aria-label="Buscar"
+            />
+            {(q.isLoading || q.isPlaceholderData) && (
+              <Loader size="xs" aria-label="Carregando" />
+            )}
+          </Group>
           <Async q={q} rows={6}>
-            {(rows) => (
+            {({ rows }) => (
               <DataTable
                 rows={rows}
+                empty={
+                  search
+                    ? `Nenhum usuário encontrado para "${search}".`
+                    : "Nenhum usuário cadastrado."
+                }
                 columns={[
                   {
                     key: "n",
@@ -120,12 +156,7 @@ export default function Usuarios() {
                   {
                     key: "r",
                     label: "Perfil",
-                    render: (u) => (
-                      <>
-                        <div>{ROLE_LABEL[u.role]}</div>
-                        {u.crmv && <div className="cell-sub">{u.crmv}</div>}
-                      </>
-                    ),
+                    render: (u) => ROLE_LABEL[u.role],
                   },
                   {
                     key: "s",
@@ -163,39 +194,13 @@ export default function Usuarios() {
                             </ActionIcon>
                           </Menu.Target>
                           <Menu.Dropdown>
-                            {u.status === "convite" && (
-                              <Menu.Item
-                                leftSection={<IconMailForward size={15} />}
-                                onClick={() =>
-                                  act(
-                                    api.staff.resendInvite(u.id),
-                                    `Convite reenviado para ${u.email}.`,
-                                  )
-                                }
-                              >
-                                Reenviar convite
-                              </Menu.Item>
-                            )}
                             <Menu.Item
                               leftSection={<IconUserCog size={15} />}
                               onClick={() => setRoleFor(u)}
                             >
                               Alterar perfil
                             </Menu.Item>
-                            {u.status === "inativo" ? (
-                              <Menu.Item
-                                leftSection={<IconUserCheck size={15} />}
-                                onClick={() =>
-                                  setStatus(
-                                    u,
-                                    "ativo",
-                                    `${u.name} foi reativado.`,
-                                  )
-                                }
-                              >
-                                Reativar acesso
-                              </Menu.Item>
-                            ) : (
+                            {u.status !== "inativo" && (
                               <Menu.Item
                                 leftSection={<IconUserOff size={15} />}
                                 color="red"
@@ -220,6 +225,21 @@ export default function Usuarios() {
               />
             )}
           </Async>
+
+          {total > pageSize && (
+            <div className="block-foot">
+              <Text size="sm" c="dimmed">
+                {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)}{" "}
+                de {total}
+              </Text>
+              <Pagination
+                value={page}
+                onChange={setPage}
+                total={pages}
+                size="sm"
+              />
+            </div>
+          )}
         </Block>
       </div>
 
