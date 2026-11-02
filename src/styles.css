@@ -27,14 +27,12 @@
   /* tamanho mínimo das pílulas */
 }
 
-html {
-  scrollbar-gutter: stable;
-}
-
 html body {
   background: var(--vc-ground);
   color: var(--vc-ink);
   -webkit-font-smoothing: antialiased;
+  scrollbar-gutter: stable;
+  max-height: 100vh;
 }
 
 .num {
