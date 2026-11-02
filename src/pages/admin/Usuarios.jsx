@@ -22,11 +22,14 @@ import {
   IconUserCog,
 } from "@tabler/icons-react";
 import { debounce, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { api } from "../../api";
-import { useInviteUser, useUsers } from "../../api/queries/users";
+import {
+  useDeactivateUser,
+  useInviteUser,
+  useUpdateUser,
+  useUsers,
+} from "../../api/queries/users";
 import { useSession } from "../../auth/session";
-import { useSubmit } from "../../hooks/useApi";
-import { act, toast } from "../../lib/notify";
+import { toast } from "../../lib/notify";
 import { fmtDateTime, isEmail, relDay } from "../../lib/format";
 import { ROLE_LABEL, USER_STATUS } from "../../lib/status";
 import {
@@ -53,7 +56,7 @@ export default function Usuarios() {
   const [invite, setInvite] = useState(false);
   const [roleFor, setRoleFor] = useState(null);
   const [deactivate, setDeactivate] = useState(null);
-  const [busy, submit] = useSubmit();
+  const deactivateUser = useDeactivateUser();
 
   const [search, setSearch] = useQueryState(
     "q",
@@ -77,11 +80,15 @@ export default function Usuarios() {
     if (q.data && !q.isPlaceholderData && page > lastPage) setPage(lastPage);
   }, [q.data, q.isPlaceholderData, page, lastPage, setPage]);
 
-  const setStatus = (u, status, msg) =>
-    submit(async () => {
-      if (await act(api.staff.update(u.id, { status }), msg))
-        setDeactivate(null);
-    });
+  const confirmDeactivate = async () => {
+    try {
+      await deactivateUser.mutateAsync(deactivate.id);
+    } catch {
+      return; // the global handler already showed the error
+    }
+    toast.ok(`Acesso de ${deactivate.name} desativado.`);
+    setDeactivate(null);
+  };
 
   return (
     <>
@@ -244,24 +251,21 @@ export default function Usuarios() {
       </div>
 
       <InviteModal opened={invite} onClose={() => setInvite(false)} />
-      <RoleModal user={roleFor} onClose={() => setRoleFor(null)} />
+      <RoleModal
+        key={roleFor?.id}
+        user={roleFor}
+        onClose={() => setRoleFor(null)}
+      />
       <ConfirmDialog
         opened={!!deactivate}
         onClose={() => setDeactivate(null)}
         title="Desativar acesso"
         confirmLabel="Desativar"
-        loading={busy}
-        onConfirm={() =>
-          setStatus(
-            deactivate,
-            "inativo",
-            `Acesso de ${deactivate.name} desativado.`,
-          )
-        }
+        loading={deactivateUser.isPending}
+        onConfirm={confirmDeactivate}
       >
         {deactivate?.name} não vai mais conseguir entrar no VetCare. Os
-        registros feitos por essa pessoa continuam no sistema e o acesso pode
-        ser reativado depois.
+        registros feitos por essa pessoa continuam no sistema.
       </ConfirmDialog>
     </>
   );
@@ -327,7 +331,7 @@ function InviteForm({ onClose }) {
 
 function RoleModal({ user, onClose }) {
   const [role, setRole] = useState(null);
-  const [busy, submit] = useSubmit();
+  const updateUser = useUpdateUser();
   return (
     <Modal
       opened={!!user}
@@ -349,19 +353,21 @@ function RoleModal({ user, onClose }) {
               Cancelar
             </Button>
             <Button
-              loading={busy}
+              loading={updateUser.isPending}
               disabled={!role || role === user.role}
-              onClick={() =>
-                submit(async () => {
-                  if (
-                    await act(
-                      api.staff.update(user.id, { role }),
-                      "Perfil alterado.",
-                    )
-                  )
-                    onClose();
-                })
-              }
+              onClick={async () => {
+                try {
+                  await updateUser.mutateAsync({
+                    id: user.id,
+                    name: user.name,
+                    role,
+                  });
+                } catch {
+                  return; // the global handler already showed the error
+                }
+                toast.ok("Perfil alterado.");
+                onClose();
+              }}
             >
               Salvar
             </Button>

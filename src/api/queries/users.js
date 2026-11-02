@@ -25,3 +25,19 @@ export const useInviteUser = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.all }),
   });
 };
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => api.users.update(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.all }),
+  });
+};
+
+export const useDeactivateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.users.deactivate,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.all }),
+  });
+};
