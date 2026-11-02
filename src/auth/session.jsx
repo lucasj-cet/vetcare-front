@@ -1,13 +1,15 @@
+import { Center, Loader } from "@mantine/core";
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
-import { db } from "../api/db";
-
-const KEY = "vetcare.session";
+import { api } from "../api";
+import { ApiError } from "../api/errors";
+import { tokenStore } from "../api/http";
 
 export const ROLES = {
   recepcao: { label: "Recepcionista", home: "/recepcao/cadastros" },
@@ -16,38 +18,58 @@ export const ROLES = {
 
 const SessionContext = createContext(null);
 
-function read() {
-  try {
-    const s = JSON.parse(localStorage.getItem(KEY));
-    return s && ROLES[s.role] && db.find("users", s.userId) ? s : null;
-  } catch {
-    return null;
-  }
-}
-
 export function SessionProvider({ children }) {
-  const [session, setSession] = useState(read);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(() => !!tokenStore.get());
 
-  const login = useCallback((s) => {
-    localStorage.setItem(KEY, JSON.stringify(s));
-    setSession(s);
+  useEffect(() => {
+    if (!tokenStore.get()) return;
+    let cancelled = false;
+    api.auth
+      .me()
+      .then((me) => {
+        if (!cancelled) setUser(me);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        if (e instanceof ApiError && e.status === 401) tokenStore.set(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const login = useCallback(({ token, user }) => {
+    tokenStore.set(token);
+    setUser(user);
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(KEY);
-    setSession(null);
+    tokenStore.set(null);
+    setUser(null);
   }, []);
 
-  const value = useMemo(() => {
-    const user = session ? db.find("users", session.userId) : null;
-    return {
-      session,
-      role: session?.role,
+  const value = useMemo(
+    () => ({
+      session: user,
+      role: user?.role,
       user,
       login,
       logout,
-    };
-  }, [session, login, logout]);
+    }),
+    [user, login, logout],
+  );
+
+  if (loading) {
+    return (
+      <Center h="100vh">
+        <Loader />
+      </Center>
+    );
+  }
 
   return (
     <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
