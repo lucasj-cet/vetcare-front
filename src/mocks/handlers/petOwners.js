@@ -384,7 +384,7 @@ export const petOwnerHandlers = [
     const found = store.petOwners
       .filter((o) => !o.deletedAt)
       .filter((o) =>
-        matches(search, o.name, o.phone, ...o.pets.map((p) => p.name)),
+        matches(search, o.name, o.phone, o.cpf, ...o.pets.map((p) => p.name)),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
 
