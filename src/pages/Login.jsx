@@ -2,6 +2,7 @@ import { Button, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { ApiError } from "../api/errors";
 import { ROLES, useSession } from "../auth/session";
 import { useSubmit } from "../hooks/useApi";
 import { isEmail } from "../lib/format";
@@ -28,11 +29,15 @@ export default function Login() {
   const onSubmit = form.onSubmit((v) =>
     submit(async () => {
       try {
-        const s = await api.auth.login(v);
-        login(s);
-        navigate(ROLES[s.role].home, { replace: true });
+        const res = await api.auth.login(v);
+        login(res);
+        navigate(ROLES[res.user.role].home, { replace: true });
       } catch (e) {
-        toast.err(e);
+        if (e instanceof ApiError && e.status === 401) {
+          toast.err(e, "E-mail ou senha incorretos.");
+        } else {
+          toast.err(e);
+        }
       }
     }),
   );
