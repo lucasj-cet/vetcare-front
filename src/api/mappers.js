@@ -1,12 +1,12 @@
 import { maskCpf, maskPhone, onlyDigits } from "../lib/format";
 
-// The API speaks `petOwner` / `specie` / `birthdate` / `notes`; the pages keep
+// The API speaks `petOwner` / `species` / `birthdate` / `notes`; the pages keep
 // the `species` / `birth` / `alerts` names they already use.
 
 export const fromApiPet = (p) => ({
   id: p.id,
   name: p.name,
-  species: p.specie,
+  species: p.species,
   breed: p.breed,
   sex: p.sex,
   birth: p.birthdate,
@@ -30,7 +30,7 @@ export const fromApiPetOwner = (o) => ({
 
 const toApiNewPet = (p) => ({
   name: p.name,
-  specie: p.species,
+  species: p.species,
   breed: p.breed,
   sex: p.sex,
   birthdate: p.birth,
@@ -61,12 +61,11 @@ export const toApiUpdatePetOwner = (o) => ({
   address: o.address,
 });
 
-// The page keeps its own status names; `peding_invite` is spelled as in the contract.
+// The page keeps its own status names (`ativo` / `convite` / `inativo`).
 const USER_STATUS_FROM_API = {
-  active: "ativo",
-  peding_invite: "convite",
-  pending_invite: "convite",
-  deactivated: "inativo",
+  ACTIVE: "ativo",
+  PENDING_INVITE: "convite",
+  DEACTIVATED: "inativo",
 };
 
 export const fromApiUser = (u) => ({

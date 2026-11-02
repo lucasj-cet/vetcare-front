@@ -12,21 +12,21 @@ export const authHandlers = [
     const { email, password } = await request.json();
     const user = store.users.find((u) => u.email === email);
     // pending invites have no password; deactivated users cannot log in
-    if (!user || user.status !== "active" || password !== user.password) {
+    if (!user || user.status !== "ACTIVE" || password !== user.password) {
       return HttpResponse.json(
         { message: "Invalid credentials" },
         { status: STATUS.UNAUTHORIZED },
       );
     }
     return HttpResponse.json({
-      token: TOKEN_PREFIX + user.email,
+      access_token: TOKEN_PREFIX + user.email,
       user: sessionUser(user),
     });
   }),
 
   http.get(`${API_URL}${ENDPOINTS.users.me}`, ({ request }) => {
     const user = userFromRequest(request);
-    if (!user || user.status !== "active") {
+    if (!user || user.status !== "ACTIVE") {
       return HttpResponse.json(
         { message: "Unauthorized" },
         { status: STATUS.UNAUTHORIZED },

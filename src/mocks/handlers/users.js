@@ -1,3 +1,4 @@
+import { isStrongPassword, PASSWORD_RULE } from "../../lib/password";
 import { http, HttpResponse } from "msw";
 import { ENDPOINTS } from "../../api/endpoints";
 import { STATUS } from "../../api/statusCodes";
@@ -16,7 +17,7 @@ const active = (id, name, email, role, lastAccessDays) => ({
   email,
   role,
   password: "password",
-  status: "active",
+  status: "ACTIVE",
   lastAccessAt: ago(lastAccessDays),
   inviteSentAt: null,
 });
@@ -27,7 +28,7 @@ const pending = (id, name, email, role, sentDays) => ({
   email,
   role,
   password: null,
-  status: "peding_invite",
+  status: "PENDING_INVITE",
   lastAccessAt: null,
   inviteSentAt: ago(sentDays),
   inviteToken: `convite-${id}`,
@@ -35,63 +36,39 @@ const pending = (id, name, email, role, sentDays) => ({
 
 const deactivated = (...args) => ({
   ...active(...args),
-  status: "deactivated",
+  status: "DEACTIVATED",
 });
 
 // in-memory store shared by the auth and users handlers
 export const store = {
   users: [
-    active("u1", "Renata Freitas", "admin@vetcare.com.br", "admin", 0),
-    active("u2", "Juliana Prado", "recepcao@vetcare.com.br", "recepcao", 1),
-    active(
-      "u3",
-      "Bruno Carvalho",
-      "bruno.carvalho@vetcare.com.br",
-      "recepcao",
-      3,
-    ),
-    active("u4", "Camila Duarte", "camila.duarte@vetcare.com.br", "admin", 5),
-    active(
-      "u5",
-      "Diego Moreira",
-      "diego.moreira@vetcare.com.br",
-      "recepcao",
-      8,
-    ),
-    active(
-      "u6",
-      "Elisa Tavares",
-      "elisa.tavares@vetcare.com.br",
-      "recepcao",
-      12,
-    ),
-    active("u7", "Fábio Nunes", "fabio.nunes@vetcare.com.br", "recepcao", 20),
-    pending(
-      "u8",
-      "Gabriela Lins",
-      "gabriela.lins@vetcare.com.br",
-      "recepcao",
-      2,
-    ),
+    active("u1", "Renata Freitas", "admin@vetcare.com.br", "ADMIN", 0),
+    active("u2", "Juliana Prado", "recepcao@vetcare.com.br", "RECEP", 1),
+    active("u3", "Bruno Carvalho", "bruno.carvalho@vetcare.com.br", "RECEP", 3),
+    active("u4", "Camila Duarte", "camila.duarte@vetcare.com.br", "ADMIN", 5),
+    active("u5", "Diego Moreira", "diego.moreira@vetcare.com.br", "RECEP", 8),
+    active("u6", "Elisa Tavares", "elisa.tavares@vetcare.com.br", "RECEP", 12),
+    active("u7", "Fábio Nunes", "fabio.nunes@vetcare.com.br", "RECEP", 20),
+    pending("u8", "Gabriela Lins", "gabriela.lins@vetcare.com.br", "RECEP", 2),
     pending(
       "u9",
       "Henrique Alves",
       "henrique.alves@vetcare.com.br",
-      "admin",
+      "ADMIN",
       6,
     ),
     deactivated(
       "u10",
       "Isabela Rocha",
       "isabela.rocha@vetcare.com.br",
-      "recepcao",
+      "RECEP",
       40,
     ),
     deactivated(
       "u11",
       "João Pedro Maia",
       "joao.maia@vetcare.com.br",
-      "recepcao",
+      "RECEP",
       70,
     ),
   ],
@@ -113,9 +90,9 @@ export const userFromRequest = (request) => {
 // null when the caller is an authenticated admin, otherwise the error response
 const requireAdmin = (request) => {
   const user = userFromRequest(request);
-  if (!user || user.status !== "active")
+  if (!user || user.status !== "ACTIVE")
     return err(STATUS.UNAUTHORIZED, "Unauthorized");
-  if (user.role !== "admin")
+  if (user.role !== "ADMIN")
     return err(403, "Acesso restrito a administradores.");
   return null;
 };
@@ -169,7 +146,7 @@ export const userHandlers = [
       email,
       role,
       password: null,
-      status: "peding_invite",
+      status: "PENDING_INVITE",
       lastAccessAt: null,
       inviteSentAt: new Date().toISOString(),
       inviteToken: `convite-${id}-${Math.random().toString(36).slice(2, 10)}`,
@@ -186,19 +163,27 @@ export const userHandlers = [
     `${API_URL}${ENDPOINTS.users.acceptInvite(":token")}`,
     async ({ request, params }) => {
       const user = store.users.find(
-        (u) => u.inviteToken === params.token && u.status === "peding_invite",
+        (u) => u.inviteToken === params.token && u.status === "PENDING_INVITE",
       );
       if (!user) return err(404, "Convite inválido ou expirado.");
 
       const { password } = await request.json();
-      if (!password || password.length < 8)
-        return err(400, "A senha precisa ter pelo menos 8 caracteres.");
+      if (!password || !isStrongPassword(password))
+        return err(400, PASSWORD_RULE);
 
       user.password = password;
-      user.status = "active";
+      user.status = "ACTIVE";
       user.inviteToken = null;
       user.lastAccessAt = new Date().toISOString();
-      return HttpResponse.json({ token: TOKEN_PREFIX + user.email });
+      return HttpResponse.json({
+        access_token: TOKEN_PREFIX + user.email,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
     },
   ),
 
@@ -210,7 +195,8 @@ export const userHandlers = [
 
       const user = store.users.find((u) => u.id === params.id);
       if (!user) return err(404, "Usuário não encontrado.");
-      user.status = "deactivated";
+      user.status = "DEACTIVATED";
+      user.inviteToken = null; // cancels any pending invite
       return new HttpResponse(null, { status: 204 });
     },
   ),

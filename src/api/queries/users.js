@@ -49,13 +49,13 @@ export const useAcceptInvite = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ token, password }) => {
-      const { token: sessionToken } = await api.users.acceptInvite(token, {
-        password,
-      });
+      const { access_token: sessionToken, user } = await api.users.acceptInvite(
+        token,
+        { password },
+      );
       tokenStore.set(sessionToken);
       // drop whatever a previous session left behind, keeping the auth query
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "auth" });
-      const user = await api.auth.me();
       queryClient.setQueryData(authKeys.me, user);
       return user;
     },

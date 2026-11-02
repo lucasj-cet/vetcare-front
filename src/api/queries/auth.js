@@ -34,7 +34,7 @@ export const useLogin = () => {
   return useMutation({
     meta: { silent: true },
     mutationFn: api.auth.login,
-    onSuccess: ({ token, user }) => {
+    onSuccess: ({ access_token: token, user }) => {
       tokenStore.set(token);
       queryClient.setQueryData(authKeys.me, user);
     },
