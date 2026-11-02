@@ -3,6 +3,7 @@ import {
   Button,
   Drawer,
   Group,
+  Loader,
   Menu,
   Pagination,
   Stack,
@@ -25,7 +26,7 @@ import {
   parseAsStringLiteral,
   useQueryState,
 } from "nuqs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useDeletePetOwner,
   usePetOwner,
@@ -48,6 +49,7 @@ import { age, kg } from "../../lib/format";
 import { toast } from "../../lib/notify";
 
 const TABS = ["tutores", "pacientes"];
+const SEARCH_DEBOUNCE_MS = 500;
 
 export default function Cadastros() {
   const [tab, setTab] = useQueryState(
@@ -58,10 +60,10 @@ export default function Cadastros() {
     "q",
     parseAsString.withDefault("").withOptions({
       history: "replace",
-      limitUrlUpdates: debounce(500),
+      limitUrlUpdates: debounce(SEARCH_DEBOUNCE_MS),
     }),
   );
-  const [debounced] = useDebouncedValue(search, 500);
+  const [debounced] = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [petOwnerForm, setPetOwnerForm] = useState(null); // { petOwner? }
   const [petForm, setPetForm] = useState(null); // { pet?, petOwnerId, petOwnerName }
@@ -100,6 +102,12 @@ export default function Cadastros() {
   const pageSize = current.data?.pageSize;
   const pages =
     total && pageSize ? Math.max(1, Math.ceil(total / pageSize)) : null;
+  // after deleting the last row of the last page, fall back to the new last page
+  const lastPage = pages ?? 1;
+  useEffect(() => {
+    if (current.data && !current.isPlaceholderData && page > lastPage)
+      setPage(lastPage);
+  }, [current.data, current.isPlaceholderData, page, lastPage, setPage]);
   const petOwnerRows = petOwners.data?.rows ?? [];
   const petRows = pets.data?.rows ?? [];
 
@@ -174,22 +182,26 @@ export default function Cadastros() {
                 <Tabs.Tab value="tutores">Tutores</Tabs.Tab>
                 <Tabs.Tab value="pacientes">Pacientes</Tabs.Tab>
               </Tabs.List>
-              <TextInput
-                leftSection={<IconSearch size={15} />}
-                placeholder={
-                  tab === "tutores"
-                    ? "Nome, CPF, telefone ou pet"
-                    : "Nome, raça ou tutor"
-                }
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.currentTarget.value);
-                  setPage(1);
-                }}
-                w={{ base: "100%", sm: 300 }}
-                mb="sm"
-                aria-label="Buscar"
-              />
+              <Group gap="xs" wrap="nowrap" mb="sm">
+                {(current.isLoading || current.isPlaceholderData) && (
+                  <Loader size="xs" aria-label="Carregando" />
+                )}
+                <TextInput
+                  leftSection={<IconSearch size={15} />}
+                  placeholder={
+                    tab === "tutores"
+                      ? "Nome, CPF, telefone ou pet"
+                      : "Nome, raça ou tutor"
+                  }
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.currentTarget.value);
+                    setPage(1);
+                  }}
+                  w={{ base: "100%", sm: 300 }}
+                  aria-label="Buscar"
+                />
+              </Group>
             </Group>
           </Tabs>
 
