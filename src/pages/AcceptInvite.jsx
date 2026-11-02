@@ -3,8 +3,7 @@ import { useForm } from "@mantine/form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAcceptInvite } from "../api/queries/users";
 import { ROLES } from "../auth/session";
-
-const MIN_PASSWORD = 8;
+import { isStrongPassword, PASSWORD_RULE } from "../lib/password";
 
 export default function AcceptInvite() {
   const { token } = useParams();
@@ -14,10 +13,7 @@ export default function AcceptInvite() {
   const form = useForm({
     initialValues: { password: "", confirm: "" },
     validate: {
-      password: (v) =>
-        v.length >= MIN_PASSWORD
-          ? null
-          : `A senha tem pelo menos ${MIN_PASSWORD} caracteres`,
+      password: (v) => (isStrongPassword(v) ? null : PASSWORD_RULE),
       confirm: (v, values) =>
         v === values.password ? null : "As senhas não são iguais",
     },

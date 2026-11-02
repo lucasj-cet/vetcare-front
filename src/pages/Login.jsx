@@ -15,8 +15,7 @@ export default function Login() {
   const form = useForm({
     validate: {
       email: (v) => (isEmail(v) ? null : "Informe um e-mail válido"),
-      password: (v) =>
-        v.length >= 6 ? null : "A senha tem pelo menos 6 caracteres",
+      password: (v) => (v ? null : "Informe a senha"),
     },
   });
 
