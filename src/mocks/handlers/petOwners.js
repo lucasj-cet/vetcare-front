@@ -293,7 +293,9 @@ export const petHandlers = [
     const found = store.petOwners
       .filter((o) => !o.deletedAt)
       .flatMap(({ pets, ...petOwner }) => pets.map((p) => ({ ...p, petOwner })))
-      .filter((p) => matches(search, p.name, p.breed, p.petOwner.name))
+      .filter((p) =>
+        matches(search, p.name, p.breed, p.petOwner.name, p.petOwner.cpf),
+      )
       .sort((a, b) => a.name.localeCompare(b.name));
 
     return HttpResponse.json({
@@ -382,7 +384,7 @@ export const petOwnerHandlers = [
     const found = store.petOwners
       .filter((o) => !o.deletedAt)
       .filter((o) =>
-        matches(search, o.name, o.cpf, o.phone, ...o.pets.map((p) => p.name)),
+        matches(search, o.name, o.phone, ...o.pets.map((p) => p.name)),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
 
