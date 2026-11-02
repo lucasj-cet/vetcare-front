@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DATA_EVENT } from "../api/db";
 
-// Carrega dados de um serviço e recarrega sozinho quando algo muda em outra tela.
 export function useApi(fn, deps = []) {
   const [state, setState] = useState({
     data: undefined,
@@ -30,12 +28,6 @@ export function useApi(fn, deps = []) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
-
-  useEffect(() => {
-    const onChange = () => load(true);
-    window.addEventListener(DATA_EVENT, onChange);
-    return () => window.removeEventListener(DATA_EVENT, onChange);
-  }, [load]);
 
   return { ...state, reload: load };
 }

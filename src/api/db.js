@@ -4,7 +4,6 @@ import { buildSeed } from "../data/seed";
 // Banco de demonstração guardado no navegador. Só os serviços de src/api/index.js falam com ele.
 
 const KEY = "vetcare.demo.v1";
-export const DATA_EVENT = "vetcare:data";
 
 function persist(s) {
   try {
@@ -34,7 +33,6 @@ let seq = 0;
 function commit() {
   if (batching) return;
   persist(state);
-  window.dispatchEvent(new Event(DATA_EVENT));
 }
 
 export const db = {
