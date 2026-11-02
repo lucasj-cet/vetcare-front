@@ -15,7 +15,7 @@ list: ({ search } = {}) => call(() => db.all('tutors')...),
 list: ({ search } = {}) => http.get('/tutors', { search }),
 ```
 
-3. No login, guarde o token: `tokenStore.set(res.token)`. O `http.js` já manda `Authorization: Bearer` e volta para `/login` em 401.
+3. O token é guardado em `src/auth/session.jsx` (`tokenStore.set(res.token)` no `login`); `index.js` só faz as requisições. O `http.js` já manda `Authorization: Bearer` e lança `ApiError`; o redirecionamento para `/login` em 401 fica no handler global (`ApiErrorHandler`).
 4. Quando todas as funções estiverem trocadas, apague `db.js` e `src/data/seed.js`.
 
 Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermelho da tela.
@@ -24,7 +24,8 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 
 | Função                                                 | Rota sugerida                                                                         | Quem usa                       |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------- | ------------------------------ |
-| `auth.login({ email, password, role })`                | `POST /auth/login` → `{ token, user }`                                                | Login                          |
+| `auth.login({ email, password })`                      | `POST /auth/login` → `{ token, user }`                                                | Login                          |
+| `auth.me()`                                            | `GET /users/me` → `{ name, email, role }`                                             | Sessão (ao recarregar)         |
 | `auth.recover(email)`                                  | `POST /auth/forgot-password`                                                          | Login › Esqueci minha senha    |
 | `staff.vets()`                                         | `GET /users?role=vet&status=ativo`                                                    | Agenda, formulários            |
 | `staff.list()`                                         | `GET /users?scope=staff`                                                              | Admin › Usuários               |
