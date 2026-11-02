@@ -14,20 +14,28 @@ import { SessionProvider } from "./auth/session";
 import ApiErrorHandler from "./api/ApiErrorHandler";
 import App from "./App";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <MantineProvider theme={theme} forceColorScheme="light">
-      <DatesProvider settings={{ locale: "pt-br", firstDayOfWeek: 0 }}>
-        <Notifications position="top-right" />
-        <BrowserRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <SessionProvider>
-            <ApiErrorHandler />
-            <App />
-          </SessionProvider>
-        </BrowserRouter>
-      </DatesProvider>
-    </MantineProvider>
-  </React.StrictMode>,
+async function enableMocking() {
+  if (!import.meta.env.DEV) return;
+  const { worker } = await import("./mocks/browser");
+  await worker.start({ onUnhandledRequest: "bypass" });
+}
+
+enableMocking().then(() =>
+  ReactDOM.createRoot(document.getElementById("root")).render(
+    <React.StrictMode>
+      <MantineProvider theme={theme} forceColorScheme="light">
+        <DatesProvider settings={{ locale: "pt-br", firstDayOfWeek: 0 }}>
+          <Notifications position="top-right" />
+          <BrowserRouter
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+          >
+            <SessionProvider>
+              <ApiErrorHandler />
+              <App />
+            </SessionProvider>
+          </BrowserRouter>
+        </DatesProvider>
+      </MantineProvider>
+    </React.StrictMode>,
+  ),
 );
