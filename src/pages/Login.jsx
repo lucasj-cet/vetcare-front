@@ -1,16 +1,15 @@
 import { Button, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Navigate, useNavigate } from "react-router-dom";
-import { api } from "../api";
 import { ApiError } from "../api/errors";
+import { useLogin } from "../api/queries/auth";
 import { STATUS } from "../api/statusCodes";
 import { ROLES, useSession } from "../auth/session";
-import { useSubmit } from "../hooks/useApi";
 import { isEmail } from "../lib/format";
 import { toast } from "../lib/notify";
 
 export default function Login() {
-  const { session, login } = useSession();
+  const { user } = useSession();
   const navigate = useNavigate();
 
   const form = useForm({
@@ -21,27 +20,25 @@ export default function Login() {
     },
   });
 
-  const [busy, submit] = useSubmit();
+  const loginMutation = useLogin();
 
-  if (session) {
-    return <Navigate to={ROLES[session.role].home} replace />;
+  if (user) {
+    return <Navigate to={ROLES[user.role].home} replace />;
   }
 
-  const onSubmit = form.onSubmit((v) =>
-    submit(async () => {
-      try {
-        const res = await api.auth.login(v);
-        login(res);
-        navigate(ROLES[res.user.role].home, { replace: true });
-      } catch (e) {
-        if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) {
-          toast.err(e, "E-mail ou senha incorretos.");
-        } else {
-          toast.err(e);
-        }
+  const onSubmit = form.onSubmit(async (v) => {
+    try {
+      const { user } = await loginMutation.mutateAsync(v);
+      navigate(ROLES[user.role].home, { replace: true });
+    } catch (e) {
+      if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) {
+        toast.err(e, "E-mail ou senha incorretos.");
+        return;
       }
-    }),
-  );
+
+      toast.err(e);
+    }
+  });
 
   return (
     <div className="login">
@@ -78,7 +75,12 @@ export default function Login() {
                 autoComplete="current-password"
                 {...form.getInputProps("password")}
               />
-              <Button type="submit" fullWidth loading={busy} mt={4}>
+              <Button
+                type="submit"
+                fullWidth
+                loading={loginMutation.isPending}
+                mt={4}
+              >
                 Entrar
               </Button>
             </Stack>

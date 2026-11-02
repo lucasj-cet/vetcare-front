@@ -10,10 +10,10 @@ import { ROLE_LABEL } from "../lib/status";
 import { NAV } from "./nav";
 
 export default function AppLayout() {
-  const { role, user, logout } = useSession();
+  const { user, logout } = useSession();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
-  const items = NAV[role];
+  const items = NAV[user.role];
 
   const signOut = () => {
     logout();
@@ -32,7 +32,7 @@ export default function AppLayout() {
           {user.name}
         </Text>
         <Text size="xs" c="dimmed">
-          {ROLE_LABEL[role]}
+          {ROLE_LABEL[user.role]}
         </Text>
       </div>
       <ActionIcon

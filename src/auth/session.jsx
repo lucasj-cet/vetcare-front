@@ -1,16 +1,8 @@
 import { Center, Loader } from "@mantine/core";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { api } from "../api";
-import { ApiError } from "../api/errors";
-import { STATUS } from "../api/statusCodes";
+import { useQueryClient } from "@tanstack/react-query";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { tokenStore } from "../api/http";
+import { authKeys, useMe } from "../api/queries/auth";
 
 export const ROLES = {
   recepcao: { label: "Recepcionista", home: "/recepcao/cadastros" },
@@ -20,53 +12,24 @@ export const ROLES = {
 const SessionContext = createContext(null);
 
 export function SessionProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(() => !!tokenStore.get());
-
-  useEffect(() => {
-    if (!tokenStore.get()) return;
-    let cancelled = false;
-    api.auth
-      .me()
-      .then((me) => {
-        if (!cancelled) setUser(me);
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) {
-          tokenStore.set(null);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const login = useCallback(({ token, user }) => {
-    tokenStore.set(token);
-    setUser(user);
-  }, []);
+  const queryClient = useQueryClient();
+  const me = useMe();
 
   const logout = useCallback(() => {
     tokenStore.set(null);
-    setUser(null);
-  }, []);
+    queryClient.setQueryData(authKeys.me, null);
+    queryClient.removeQueries();
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({
-      session: user,
-      role: user?.role,
-      user,
-      login,
+      user: me.data ?? null,
       logout,
     }),
-    [user, login, logout],
+    [me.data, logout],
   );
 
-  if (loading) {
+  if (me.isLoading) {
     return (
       <Center h="100vh">
         <Loader />

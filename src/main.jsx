@@ -1,18 +1,22 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { DatesProvider } from "@mantine/dates";
 import { Notifications } from "@mantine/notifications";
-import "dayjs/locale/pt-br";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import ApiErrorHandler from "./api/ApiErrorHandler";
+import { queryClient } from "./api/queryClient";
+import App from "./App";
+import { SessionProvider } from "./auth/session";
+import { theme } from "./theme";
+
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
+import "dayjs/locale/pt-br";
 import "./styles.css";
-import { theme } from "./theme";
-import { SessionProvider } from "./auth/session";
-import ApiErrorHandler from "./api/ApiErrorHandler";
-import App from "./App";
 
 async function enableMocking() {
   if (!import.meta.env.DEV) return;
@@ -29,10 +33,13 @@ enableMocking().then(() =>
           <BrowserRouter
             future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
           >
-            <SessionProvider>
-              <ApiErrorHandler />
-              <App />
-            </SessionProvider>
+            <QueryClientProvider client={queryClient}>
+              <SessionProvider>
+                <ApiErrorHandler />
+                <App />
+              </SessionProvider>
+              <ReactQueryDevtools />
+            </QueryClientProvider>
           </BrowserRouter>
         </DatesProvider>
       </MantineProvider>
