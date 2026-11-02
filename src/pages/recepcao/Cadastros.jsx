@@ -29,7 +29,7 @@ import { useState } from "react";
 import { api } from "../../api";
 import { usePetOwner, usePetOwners } from "../../api/queries/petOwners";
 import { usePets } from "../../api/queries/pets";
-import { PetModal, TutorModal } from "../../components/PeopleForms";
+import { PetModal, PetOwnerModal } from "../../components/PeopleForms";
 import {
   Async,
   Block,
@@ -61,8 +61,8 @@ export default function Cadastros() {
   );
   const [debounced] = useDebouncedValue(search, 500);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [petOwnerForm, setPetOwnerForm] = useState(null); // { tutor? }
-  const [petForm, setPetForm] = useState(null); // { pet?, tutorId, tutorName }
+  const [petOwnerForm, setPetOwnerForm] = useState(null); // { petOwner? }
+  const [petForm, setPetForm] = useState(null); // { pet?, petOwnerId, petOwnerName }
   const [openPetOwner, setOpenPetOwner] = useState(null);
   const [toDelete, setToDelete] = useState(null); // { kind, row }
   const [deleting, submit] = useSubmit();
@@ -92,12 +92,14 @@ export default function Cadastros() {
     submit(async () => {
       const { kind, row } = toDelete;
       const ok = await act(
-        kind === "tutor" ? api.tutors.remove(row.id) : api.pets.remove(row.id),
+        kind === "petOwner"
+          ? api.petOwners.remove(row.id)
+          : api.pets.remove(row.id),
         `${row.name} foi excluído.`,
       );
       if (ok) {
         setToDelete(null);
-        if (kind === "tutor") setOpenPetOwner(null);
+        if (kind === "petOwner") setOpenPetOwner(null);
       }
     });
 
@@ -237,20 +239,23 @@ export default function Cadastros() {
                           {
                             label: "Editar tutor",
                             icon: IconPencil,
-                            onClick: () => setPetOwnerForm({ tutor: t }),
+                            onClick: () => setPetOwnerForm({ petOwner: t }),
                           },
                           {
                             label: "Adicionar pet",
                             icon: IconPlus,
                             onClick: () =>
-                              setPetForm({ tutorId: t.id, tutorName: t.name }),
+                              setPetForm({
+                                petOwnerId: t.id,
+                                petOwnerName: t.name,
+                              }),
                           },
                           {
                             label: "Excluir",
                             icon: IconTrash,
                             color: "red",
                             onClick: () =>
-                              setToDelete({ kind: "tutor", row: t }),
+                              setToDelete({ kind: "petOwner", row: t }),
                           },
                         ]),
                     },
@@ -269,7 +274,7 @@ export default function Cadastros() {
                       ? `Nenhum paciente encontrado para "${search}".`
                       : "Nenhum paciente cadastrado."
                   }
-                  onRowClick={(p) => setOpenPetOwner(p.tutorId)}
+                  onRowClick={(p) => setOpenPetOwner(p.petOwnerId)}
                   columns={[
                     {
                       key: "name",
@@ -287,9 +292,9 @@ export default function Cadastros() {
                       ),
                     },
                     {
-                      key: "tutor",
+                      key: "petOwner",
                       label: "Tutor",
-                      render: (p) => p.tutor?.name,
+                      render: (p) => p.petOwner?.name,
                     },
                     { key: "age", label: "Idade", render: (p) => age(p.birth) },
                     {
@@ -332,7 +337,7 @@ export default function Cadastros() {
                   ]}
                   mobile={{
                     title: (p) => `${p.name} · ${p.breed}`,
-                    sub: (p) => `${p.tutor?.name} · ${age(p.birth)}`,
+                    sub: (p) => `${p.petOwner?.name} · ${age(p.birth)}`,
                     side: (p) =>
                       p.alerts && (
                         <Text size="xs" c="red.8">
@@ -366,31 +371,31 @@ export default function Cadastros() {
       <PetOwnerDrawer
         id={openPetOwner}
         onClose={() => setOpenPetOwner(null)}
-        onEdit={(t) => setPetOwnerForm({ tutor: t })}
-        onAddPet={(t) => setPetForm({ tutorId: t.id, tutorName: t.name })}
+        onEdit={(t) => setPetOwnerForm({ petOwner: t })}
+        onAddPet={(t) => setPetForm({ petOwnerId: t.id, petOwnerName: t.name })}
         onEditPet={(p) => setPetForm({ pet: p })}
         onDelete={(kind, row) => setToDelete({ kind, row })}
       />
-      <TutorModal
+      <PetOwnerModal
         opened={!!petOwnerForm}
         onClose={() => setPetOwnerForm(null)}
-        tutor={petOwnerForm?.tutor}
+        petOwner={petOwnerForm?.petOwner}
       />
       <PetModal
         opened={!!petForm}
         onClose={() => setPetForm(null)}
         pet={petForm?.pet}
-        tutorId={petForm?.tutorId}
-        tutorName={petForm?.tutorName}
+        petOwnerId={petForm?.petOwnerId}
+        petOwnerName={petForm?.petOwnerName}
       />
       <ConfirmDialog
         opened={!!toDelete}
         onClose={() => setToDelete(null)}
         onConfirm={remove}
         loading={deleting}
-        title={toDelete?.kind === "tutor" ? "Excluir tutor" : "Excluir pet"}
+        title={toDelete?.kind === "petOwner" ? "Excluir tutor" : "Excluir pet"}
       >
-        {toDelete?.kind === "tutor"
+        {toDelete?.kind === "petOwner"
           ? `Excluir ${toDelete.row.name} e os pets cadastrados para ele? O histórico de atendimentos e pagamentos continua guardado.`
           : `Excluir ${toDelete?.row.name} dos cadastros? O histórico clínico continua guardado.`}
       </ConfirmDialog>
@@ -430,7 +435,7 @@ function PetOwnerDetails({ id, onEdit, onAddPet, onEditPet, onDelete }) {
                 size={30}
                 color="red"
                 aria-label="Excluir tutor"
-                onClick={() => onDelete("tutor", t)}
+                onClick={() => onDelete("petOwner", t)}
               >
                 <IconTrash size={15} />
               </ActionIcon>

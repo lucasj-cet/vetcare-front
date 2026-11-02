@@ -96,10 +96,7 @@ export const petOwners = {
     fromApiPetOwner(
       await http.patch(ENDPOINTS.petOwners.byId(id), toApiUpdatePetOwner(data)),
     ),
-};
-
-export const tutors = {
-  // DELETE /tutors/:id (exclusão lógica: o histórico clínico e financeiro fica)
+  // DELETE /pet-owners/:id (exclusão lógica: o histórico clínico e financeiro fica)
   remove: (id) =>
     call(() => {
       const pets = db.all("pets").filter((p) => p.tutorId === id && alive(p));
@@ -138,7 +135,6 @@ export const api = {
   auth,
   staff,
   petOwners,
-  tutors,
   pets,
   demo,
 };

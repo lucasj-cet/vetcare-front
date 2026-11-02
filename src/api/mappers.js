@@ -1,7 +1,7 @@
 import { maskCpf, maskPhone, onlyDigits } from "../lib/format";
 
 // The API speaks `petOwner` / `specie` / `birthdate` / `notes`; the pages keep
-// the `tutor` / `species` / `birth` / `alerts` names they already use.
+// the `species` / `birth` / `alerts` names they already use.
 
 export const fromApiPet = (p) => ({
   id: p.id,
@@ -13,8 +13,8 @@ export const fromApiPet = (p) => ({
   weight: p.weight,
   alerts: p.notes,
   ...(p.petOwner && {
-    tutorId: p.petOwner.id,
-    tutor: { id: p.petOwner.id, name: p.petOwner.name },
+    petOwnerId: p.petOwner.id,
+    petOwner: { id: p.petOwner.id, name: p.petOwner.name },
   }),
 });
 
@@ -25,7 +25,7 @@ export const fromApiPetOwner = (o) => ({
   phone: maskPhone(o.phone),
   email: o.email,
   address: o.address,
-  pets: (o.pets ?? []).map((p) => ({ ...fromApiPet(p), tutorId: o.id })),
+  pets: (o.pets ?? []).map((p) => ({ ...fromApiPet(p), petOwnerId: o.id })),
 });
 
 const toApiNewPet = (p) => ({
@@ -38,9 +38,9 @@ const toApiNewPet = (p) => ({
   notes: p.alerts,
 });
 
-export const toApiCreatePet = ({ tutorId, ...p }) => ({
+export const toApiCreatePet = ({ petOwnerId, ...p }) => ({
   ...toApiNewPet(p),
-  petOwnerId: tutorId,
+  petOwnerId,
 });
 
 export const toApiUpdatePet = toApiNewPet;

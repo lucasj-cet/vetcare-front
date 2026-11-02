@@ -97,28 +97,28 @@ function PetFields({ form, prefix = "" }) {
   );
 }
 
-export function TutorModal({ opened, onClose, tutor }) {
+export function PetOwnerModal({ opened, onClose, petOwner }) {
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title={tutor ? "Editar tutor" : "Cadastro de tutor e pet"}
+      title={petOwner ? "Editar tutor" : "Cadastro de tutor e pet"}
       size="xl"
     >
-      {opened && <TutorForm onClose={onClose} tutor={tutor} />}
+      {opened && <PetOwnerForm onClose={onClose} petOwner={petOwner} />}
     </Modal>
   );
 }
 
-function TutorForm({ onClose, tutor }) {
+function PetOwnerForm({ onClose, petOwner }) {
   const form = useForm({
     initialValues: {
-      name: tutor?.name ?? "",
-      cpf: tutor?.cpf ?? "",
-      phone: tutor?.phone ?? "",
-      email: tutor?.email ?? "",
-      address: tutor?.address ?? "",
-      withPet: !tutor,
+      name: petOwner?.name ?? "",
+      cpf: petOwner?.cpf ?? "",
+      phone: petOwner?.phone ?? "",
+      email: petOwner?.email ?? "",
+      address: petOwner?.address ?? "",
+      withPet: !petOwner,
       pet: petInitial(),
     },
     validate: {
@@ -142,9 +142,9 @@ function TutorForm({ onClose, tutor }) {
       email: v.email.trim().toLowerCase(),
       address: v.address.trim(),
     };
-    if (tutor)
+    if (petOwner)
       return update.mutate(
-        { id: tutor.id, ...data },
+        { id: petOwner.id, ...data },
         {
           onSuccess: () => {
             toast.ok("Cadastro atualizado.");
@@ -167,7 +167,7 @@ function TutorForm({ onClose, tutor }) {
     );
   });
 
-  const isEdit = Boolean(tutor);
+  const isEdit = Boolean(petOwner);
 
   return (
     <form onSubmit={onSubmit} noValidate>
@@ -209,7 +209,7 @@ function TutorForm({ onClose, tutor }) {
         />
       </SimpleGrid>
 
-      {!tutor && (
+      {!petOwner && (
         <>
           <Divider my="lg" />
           <Checkbox
@@ -229,7 +229,7 @@ function TutorForm({ onClose, tutor }) {
   );
 }
 
-export function PetModal({ opened, onClose, pet, tutorId, tutorName }) {
+export function PetModal({ opened, onClose, pet, petOwnerId, petOwnerName }) {
   return (
     <Modal
       opened={opened}
@@ -237,16 +237,18 @@ export function PetModal({ opened, onClose, pet, tutorId, tutorName }) {
       title={
         pet
           ? `Editar ${pet.name}`
-          : `Novo pet${tutorName ? ` de ${tutorName}` : ""}`
+          : `Novo pet${petOwnerName ? ` de ${petOwnerName}` : ""}`
       }
       size="xl"
     >
-      {opened && <PetForm onClose={onClose} pet={pet} tutorId={tutorId} />}
+      {opened && (
+        <PetForm onClose={onClose} pet={pet} petOwnerId={petOwnerId} />
+      )}
     </Modal>
   );
 }
 
-function PetForm({ onClose, pet, tutorId }) {
+function PetForm({ onClose, pet, petOwnerId }) {
   const form = useForm({
     initialValues: petInitial(pet),
     validate: petRules(),
@@ -273,7 +275,7 @@ function PetForm({ onClose, pet, tutorId }) {
       return update.mutate({ id: pet.id, ...data });
     }
 
-    create.mutate({ tutorId, ...data });
+    create.mutate({ petOwnerId, ...data });
   });
   return (
     <form onSubmit={onSubmit} noValidate>
