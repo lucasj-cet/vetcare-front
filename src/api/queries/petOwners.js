@@ -58,8 +58,13 @@ export const useDeletePetOwner = ({ onSuccess, ...options } = {}) => {
     ...options,
     mutationFn: api.petOwners.remove,
     onSuccess: async (...args) => {
+      const [, id] = args;
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: petOwnerKeys.all }),
+        // skip the deleted owner's detail: refetching it would 404 while the drawer is still open
+        queryClient.invalidateQueries({
+          queryKey: petOwnerKeys.all,
+          predicate: (q) => q.queryKey[2] !== id,
+        }),
         queryClient.invalidateQueries({ queryKey: petKeys.all }),
       ]);
       return onSuccess?.(...args);
