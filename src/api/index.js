@@ -37,18 +37,6 @@ const fail = (message) => {
 };
 
 const alive = (r) => !r.deletedAt;
-const petById = (id) => db.find("pets", id);
-const tutorById = (id) => db.find("tutors", id);
-
-function petProfile(petId) {
-  const pet = petById(petId);
-  if (!pet) fail("Paciente não encontrado.");
-  return {
-    pet,
-    tutor: tutorById(pet.tutorId),
-  };
-}
-
 // ============================== autenticação ==============================
 
 export const auth = {
@@ -96,7 +84,6 @@ export const petOwners = {
     fromApiPetOwner(
       await http.patch(ENDPOINTS.petOwners.byId(id), toApiUpdatePetOwner(data)),
     ),
-  // DELETE /pet-owners/:id (exclusão lógica: o histórico clínico e financeiro fica)
   remove: (id) =>
     call(() => {
       const pets = db.all("pets").filter((p) => p.tutorId === id && alive(p));
@@ -115,7 +102,6 @@ export const pets = {
       await http.get(ENDPOINTS.pets.list, { search, page }),
       fromApiPet,
     ),
-  profile: (id) => call(() => petProfile(id)),
   get: async (id) => fromApiPet(await http.get(ENDPOINTS.pets.byId(id))),
   create: async (data) =>
     fromApiPet(await http.post(ENDPOINTS.pets.create, toApiCreatePet(data))),
