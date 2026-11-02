@@ -140,7 +140,49 @@ export const petHandlers = [
   }),
 ];
 
+let nextId = 1000;
+
+const badRequest = (message) =>
+  HttpResponse.json({ statusCode: 400, message }, { status: 400 });
+
 export const petOwnerHandlers = [
+  http.post(`${API_URL}${ENDPOINTS.petOwners.create}`, async ({ request }) => {
+    const {
+      name,
+      cpf,
+      phone,
+      email,
+      address,
+      pets = [],
+    } = await request.json();
+
+    if (!name?.trim() || !email?.trim())
+      return badRequest("name and email are required");
+    if (!/^\d{11}$/.test(cpf ?? "")) return badRequest("cpf must be 11 digits");
+    if (!/^\d{10,11}$/.test(phone ?? ""))
+      return badRequest("phone must be 10 or 11 digits");
+    if (pets.some((p) => !p.name?.trim() || !p.specie || !p.breed))
+      return badRequest("invalid pet");
+
+    if (store.petOwners.some((o) => !o.deletedAt && o.cpf === cpf))
+      return HttpResponse.json(
+        { statusCode: 409, message: "Já existe um tutor com esse CPF." },
+        { status: 409 },
+      );
+
+    const petOwner = {
+      id: `po${nextId++}`,
+      name,
+      cpf,
+      phone,
+      email,
+      address: address ?? "",
+      pets: pets.map((p) => ({ notes: "", ...p, id: `p${nextId++}` })),
+    };
+    store.petOwners.push(petOwner);
+    return HttpResponse.json(petOwner, { status: 201 });
+  }),
+
   http.get(`${API_URL}${ENDPOINTS.petOwners.list}`, ({ request }) => {
     const url = new URL(request.url);
     const search = url.searchParams.get("search") ?? "";

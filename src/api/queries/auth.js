@@ -32,6 +32,7 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { silent: true },
     mutationFn: api.auth.login,
     onSuccess: ({ token, user }) => {
       tokenStore.set(token);

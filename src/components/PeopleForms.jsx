@@ -14,8 +14,9 @@ import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
 import { api } from "../api";
+import { useCreatePetOwner } from "../api/queries/petOwners";
 import { useSubmit } from "../hooks/useApi";
-import { act } from "../lib/notify";
+import { act, toast } from "../lib/notify";
 import { isEmail, maskCpf, maskPhone, onlyDigits, toISO } from "../lib/format";
 import { FormActions } from "./ui";
 
@@ -131,31 +132,39 @@ function TutorForm({ onClose, tutor }) {
       pet: petRules((values) => values.withPet),
     },
   });
-  const [saving, submit] = useSubmit();
-  const onSubmit = form.onSubmit((v) =>
-    submit(async () => {
-      const data = {
-        name: v.name.trim(),
-        cpf: v.cpf,
-        phone: v.phone,
-        email: v.email.trim().toLowerCase(),
-        address: v.address.trim(),
-      };
-      const ok = await act(
-        api.tutors.save({
-          id: tutor?.id,
-          ...data,
-          pet: v.withPet ? petPayload(v.pet) : undefined,
-        }),
-        tutor
-          ? "Cadastro atualizado."
-          : v.withPet
-            ? `${data.name} e ${v.pet.name.trim()} cadastrados.`
-            : "Tutor cadastrado.",
-      );
-      if (ok) onClose();
-    }),
-  );
+  const [updating, submit] = useSubmit();
+  const create = useCreatePetOwner();
+  const saving = updating || create.isPending;
+  const onSubmit = form.onSubmit((v) => {
+    const data = {
+      name: v.name.trim(),
+      cpf: v.cpf,
+      phone: v.phone,
+      email: v.email.trim().toLowerCase(),
+      address: v.address.trim(),
+    };
+    if (tutor)
+      return submit(async () => {
+        const ok = await act(
+          api.tutors.save({ id: tutor.id, ...data }),
+          "Cadastro atualizado.",
+        );
+        if (ok) onClose();
+      });
+    create.mutate(
+      { ...data, pet: v.withPet ? petPayload(v.pet) : undefined },
+      {
+        onSuccess: () => {
+          toast.ok(
+            v.withPet
+              ? `${data.name} e ${v.pet.name.trim()} cadastrados.`
+              : "Tutor cadastrado.",
+          );
+          onClose();
+        },
+      },
+    );
+  });
 
   return (
     <form onSubmit={onSubmit} noValidate>

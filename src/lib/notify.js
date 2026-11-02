@@ -10,7 +10,7 @@ export const toast = {
   ) => {
     dispatchApiError(error);
     notifications.show({
-      message: error?.userMessage || fallback,
+      message: error?.userMessage || error?.data?.message || fallback,
       color: "red",
       withBorder: true,
     });

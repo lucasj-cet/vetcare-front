@@ -1,5 +1,11 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { api } from "..";
+import { petKeys } from "./pets";
 
 export const petOwnerKeys = {
   all: ["pet-owners"],
@@ -21,3 +27,15 @@ export const usePetOwner = (id) =>
     queryKey: petOwnerKeys.detail(id),
     queryFn: () => api.petOwners.get(id),
   });
+
+export const useCreatePetOwner = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.petOwners.create,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: petOwnerKeys.all }),
+        queryClient.invalidateQueries({ queryKey: petKeys.all }),
+      ]),
+  });
+};

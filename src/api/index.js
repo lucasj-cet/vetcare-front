@@ -1,9 +1,14 @@
 import dayjs from "dayjs";
-import { onlyDigits, todayISO } from "../lib/format";
+import { onlyDigits } from "../lib/format";
 import { db } from "./db";
 import { ENDPOINTS } from "./endpoints";
 import { http } from "./http";
-import { fromApiPage, fromApiPet, fromApiPetOwner } from "./mappers";
+import {
+  fromApiPage,
+  fromApiPet,
+  fromApiPetOwner,
+  toApiCreatePetOwner,
+} from "./mappers";
 
 // ---------------------------------------------------------------------------
 // Serviços do VetCare. As telas só chamam estas funções, todas assíncronas.
@@ -81,11 +86,14 @@ export const petOwners = {
     ),
   get: async (id) =>
     fromApiPetOwner(await http.get(ENDPOINTS.petOwners.byId(id))),
+  create: async (data) =>
+    fromApiPetOwner(
+      await http.post(ENDPOINTS.petOwners.create, toApiCreatePetOwner(data)),
+    ),
 };
 
 export const tutors = {
-  // POST /tutors (com o primeiro pet opcional) | PUT /tutors/:id
-  save: ({ id, pet, ...data }) =>
+  save: ({ id, ...data }) =>
     call(() => {
       const cpf = onlyDigits(data.cpf);
       if (
@@ -94,12 +102,7 @@ export const tutors = {
           .some((t) => alive(t) && t.id !== id && onlyDigits(t.cpf) === cpf)
       )
         fail("Já existe um tutor com esse CPF.");
-      return db.batch(() => {
-        if (id) return db.update("tutors", id, data);
-        const tutor = db.insert("tutors", { ...data, createdAt: todayISO() });
-        if (pet) db.insert("pets", { ...pet, tutorId: tutor.id });
-        return tutor;
-      });
+      return db.update("tutors", id, data);
     }),
   // DELETE /tutors/:id (exclusão lógica: o histórico clínico e financeiro fica)
   remove: (id) =>
