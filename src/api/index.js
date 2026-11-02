@@ -155,22 +155,21 @@ function petProfile(petId) {
 }
 
 // ============================== autenticação ==============================
-const ROLE_USER = { tutor: "u6", recepcao: "u1", vet: "u2", admin: "u4" };
 
 export const auth = {
   // POST /auth/login → { token, user }
-  login: ({ email, password, role }) =>
+  login: ({ email, password }) =>
     call(() => {
       if (!password || password.length < 6) fail("E-mail ou senha incorretos.");
-      const match = db
+      const user = db
         .all("users")
         .find(
           (u) =>
-            u.role === role &&
             u.email.toLowerCase() === email.trim().toLowerCase() &&
             u.status === "ativo",
         );
-      const user = match ?? userById(ROLE_USER[role]);
+
+      if (!user) fail("E-mail ou senha incorretos.");
       db.update("users", user.id, {
         lastSeen: dayjs().format("YYYY-MM-DDTHH:mm"),
       });

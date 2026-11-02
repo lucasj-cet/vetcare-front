@@ -21,18 +21,12 @@ const DEMO_EMAIL = {
   admin: "renata.freitas@vetcare.com.br",
 };
 
-const PROFILES = [
-  { value: "recepcao", label: "Recepcionista" },
-  { value: "admin", label: "Administrador" },
-];
-
 export default function Login() {
   const { session, login } = useSession();
   const navigate = useNavigate();
 
   const form = useForm({
     initialValues: {
-      role: "recepcao",
       email: DEMO_EMAIL.recepcao,
       password: "12345678",
     },
@@ -84,16 +78,6 @@ export default function Login() {
           </Text>
           <form onSubmit={onSubmit} noValidate>
             <Stack gap="md">
-              <Select
-                label="Perfil de demonstração"
-                data={PROFILES}
-                allowDeselect={false}
-                {...form.getInputProps("role")}
-                onChange={(role) => {
-                  form.setFieldValue("role", role);
-                  form.setFieldValue("email", DEMO_EMAIL[role]);
-                }}
-              />
               <TextInput
                 label="E-mail"
                 type="email"
