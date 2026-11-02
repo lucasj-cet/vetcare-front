@@ -15,21 +15,11 @@ import { useSubmit } from "../hooks/useApi";
 import { isEmail } from "../lib/format";
 import { toast } from "../lib/notify";
 
-// e-mail de exemplo de cada perfil da demonstração
-const DEMO_EMAIL = {
-  recepcao: "ana.costa@vetcare.com.br",
-  admin: "renata.freitas@vetcare.com.br",
-};
-
 export default function Login() {
   const { session, login } = useSession();
   const navigate = useNavigate();
 
   const form = useForm({
-    initialValues: {
-      email: DEMO_EMAIL.recepcao,
-      password: "12345678",
-    },
     validate: {
       email: (v) => (isEmail(v) ? null : "Informe um e-mail válido"),
       password: (v) =>
