@@ -79,19 +79,11 @@ export const petOwners = {
       await http.get(ENDPOINTS.petOwners.list, { search, page }),
       fromApiPetOwner,
     ),
+  get: async (id) =>
+    fromApiPetOwner(await http.get(ENDPOINTS.petOwners.byId(id))),
 };
 
 export const tutors = {
-  get: (id) =>
-    call(() => {
-      const t = tutorById(id);
-      if (!t || !alive(t)) fail("Tutor não encontrado.");
-      const pets = db.all("pets").filter((p) => p.tutorId === id && alive(p));
-      return {
-        ...t,
-        pets,
-      };
-    }),
   // POST /tutors (com o primeiro pet opcional) | PUT /tutors/:id
   save: ({ id, pet, ...data }) =>
     call(() => {

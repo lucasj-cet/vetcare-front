@@ -159,4 +159,15 @@ export const petOwnerHandlers = [
       pageSize: PAGE_SIZE,
     });
   }),
+
+  http.get(`${API_URL}${ENDPOINTS.petOwners.byId(":id")}`, ({ params }) => {
+    const petOwner = store.petOwners.find((o) => o.id === params.id);
+    if (!petOwner || petOwner.deletedAt) {
+      return HttpResponse.json(
+        { statusCode: 404, message: "Pet owner not found" },
+        { status: 404 },
+      );
+    }
+    return HttpResponse.json(petOwner);
+  }),
 ];

@@ -27,7 +27,7 @@ import {
 } from "nuqs";
 import { useState } from "react";
 import { api } from "../../api";
-import { usePetOwners } from "../../api/queries/petOwners";
+import { usePetOwner, usePetOwners } from "../../api/queries/petOwners";
 import { usePets } from "../../api/queries/pets";
 import { PetModal, TutorModal } from "../../components/PeopleForms";
 import {
@@ -41,8 +41,8 @@ import {
   PageHeader,
   PetAvatar,
 } from "../../components/ui";
-import { useApi, useSubmit } from "../../hooks/useApi";
-import { age, fmtDate, kg } from "../../lib/format";
+import { useSubmit } from "../../hooks/useApi";
+import { age, kg } from "../../lib/format";
 import { act } from "../../lib/notify";
 
 const TABS = ["tutores", "pacientes"];
@@ -61,7 +61,7 @@ export default function Cadastros() {
   );
   const [debounced] = useDebouncedValue(search, 500);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [tutorForm, setPetOwnerForm] = useState(null); // { tutor? }
+  const [petOwnerForm, setPetOwnerForm] = useState(null); // { tutor? }
   const [petForm, setPetForm] = useState(null); // { pet?, tutorId, tutorName }
   const [openPetOwner, setOpenPetOwner] = useState(null);
   const [toDelete, setToDelete] = useState(null); // { kind, row }
@@ -363,7 +363,7 @@ export default function Cadastros() {
         </Block>
       </div>
 
-      <TutorDrawer
+      <PetOwnerDrawer
         id={openPetOwner}
         onClose={() => setOpenPetOwner(null)}
         onEdit={(t) => setPetOwnerForm({ tutor: t })}
@@ -372,9 +372,9 @@ export default function Cadastros() {
         onDelete={(kind, row) => setToDelete({ kind, row })}
       />
       <TutorModal
-        opened={!!tutorForm}
+        opened={!!petOwnerForm}
         onClose={() => setPetOwnerForm(null)}
-        tutor={tutorForm?.tutor}
+        tutor={petOwnerForm?.tutor}
       />
       <PetModal
         opened={!!petForm}
@@ -398,29 +398,24 @@ export default function Cadastros() {
   );
 }
 
-function TutorDrawer({ id, onClose, ...handlers }) {
+function PetOwnerDrawer({ id, onClose, ...handlers }) {
   return (
     <Drawer opened={!!id} onClose={onClose} title="Ficha do tutor" size="lg">
-      {id && <TutorDetails id={id} {...handlers} />}
+      {id && <PetOwnerDetails id={id} {...handlers} />}
     </Drawer>
   );
 }
 
-function TutorDetails({ id, onEdit, onAddPet, onEditPet, onDelete }) {
-  const q = useApi(() => api.tutors.get(id), [id]);
+function PetOwnerDetails({ id, onEdit, onAddPet, onEditPet, onDelete }) {
+  const petOwner = usePetOwner(id);
   return (
-    <Async q={q}>
+    <Async q={petOwner}>
       {(t) => (
         <Stack gap="lg">
           <Group justify="space-between" align="flex-start">
-            <div>
-              <Text fw={600} size="lg">
-                {t.name}
-              </Text>
-              <Text size="sm" c="dimmed">
-                Cliente desde {fmtDate(t.createdAt)}
-              </Text>
-            </div>
+            <Text fw={600} size="lg">
+              {t.name}
+            </Text>
             <Group gap="xs">
               <Button
                 variant="default"

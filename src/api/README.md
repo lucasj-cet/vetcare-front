@@ -33,7 +33,7 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `staff.resendInvite(id)`                               | `POST /users/:id/invite`                                                              | Admin › Usuários             |
 | `staff.update(id, patch)`                              | `PATCH /users/:id` (perfil, status)                                                   | Admin › Usuários             |
 | `petOwners.list({ search, page })`                     | `GET /pet-owners?search=&page=` → `{ data, total, page, pageSize }` (com `pets[]`)    | Recepção › Cadastros         |
-| `tutors.get(id)`                                       | `GET /tutors/:id` (com pets, próximas consultas, cobranças em aberto)                 | Ficha do tutor               |
+| `petOwners.get(id)`                                    | `GET /pet-owners/:id` (com `pets[]`; 404 se não existir ou foi excluído)              | Ficha do tutor               |
 | `tutors.save(data)`                                    | `POST /tutors` (aceita `pet` junto) · `PUT /tutors/:id`                               | Cadastro de tutor e pet      |
 | `tutors.remove(id)`                                    | `DELETE /tutors/:id` (409 se tiver consulta marcada)                                  | Excluir tutor                |
 | `pets.list({ search, page })`                          | `GET /pets?search=&page=` → `{ data, total, page, pageSize }` (com `petOwner`)        | Recepção › Cadastros         |

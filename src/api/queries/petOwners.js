@@ -14,3 +14,10 @@ export const usePetOwners = ({ search = "", page = 1, enabled = true } = {}) =>
     queryFn: () => api.petOwners.list({ search, page }),
     placeholderData: keepPreviousData,
   });
+
+export const usePetOwner = (id) =>
+  useQuery({
+    enabled: !!id,
+    queryKey: petOwnerKeys.detail(id),
+    queryFn: () => api.petOwners.get(id),
+  });
