@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Drawer, Stack, Text } from "@mantine/core";
+﻿import { ActionIcon, Button, Drawer, Stack, Text } from "@mantine/core";
 import { IconLogout, IconMenu2, IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -8,12 +8,14 @@ import { PersonAvatar } from "../components/ui";
 import { act } from "../lib/notify";
 import { ROLE_LABEL } from "../lib/status";
 import { NAV } from "./nav";
+import Sidebar, { useSidebarCollapsed } from "./Sidebar";
 
 export default function AppLayout() {
   const { user, logout } = useSession();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
   const items = NAV[user.role];
+  const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
   const signOut = () => {
     logout();
@@ -47,32 +49,14 @@ export default function AppLayout() {
   );
 
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <div className="clinic">
-          <img src="/favicon.svg" alt="" />
-          <div>
-            <div className="clinic-name">VetCare</div>
-            <div className="clinic-sub">Clínica veterinária</div>
-          </div>
-        </div>
-        <div className="nav-label">Menu principal</div>
-        <nav aria-label="Menu principal">
-          {items.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} className="nav-link">
-              <Icon size={16} stroke={1.8} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-        <div style={{ flex: 1 }} />
-
-        <button type="button" className="side-btn" onClick={resetDemo}>
-          <IconRefresh size={16} stroke={1.8} />
-          Restaurar demonstração
-        </button>
-        {userRow}
-      </aside>
+    <div className={`shell${collapsed ? " collapsed" : ""}`}>
+      <Sidebar
+        items={items}
+        collapsed={collapsed}
+        onToggle={toggleCollapsed}
+        onResetDemo={resetDemo}
+        footer={userRow}
+      />
 
       <header className="topbar">
         <div className="brand">

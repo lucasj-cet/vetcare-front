@@ -154,6 +154,61 @@ html body {
   text-overflow: ellipsis;
 }
 
+.shell {
+  transition: grid-template-columns 0.18s ease;
+}
+.sidebar {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.shell.collapsed {
+  grid-template-columns: 60px minmax(0, 1fr);
+}
+.sidebar > * {
+  width: 220px;
+  flex-shrink: 0;
+}
+.nav-link svg,
+.side-btn svg {
+  flex-shrink: 0;
+}
+.shell.collapsed .sidebar > * {
+  width: 36px;
+}
+.shell.collapsed .clinic {
+  padding: 0 3px 22px;
+}
+.shell.collapsed .sidebar .nav-label {
+  display: none;
+}
+.sidebar .txt,
+.sidebar .nav-label {
+  transition: opacity 0.12s ease;
+}
+.shell.collapsed .sidebar .txt,
+.shell.collapsed .sidebar .nav-label {
+  opacity: 0;
+}
+.shell.collapsed .sidebar .user-row .who {
+  display: none;
+}
+.side-toggle {
+  width: 34px;
+  justify-content: center;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.shell.collapsed .side-toggle {
+  width: 36px;
+  margin: 0 0 14px;
+}
+.shell.collapsed .user-row {
+  width: 36px;
+  flex-direction: column;
+  padding: 10px 0;
+}
+
 .main {
   min-width: 0;
   padding: 34px 36px 56px 16px;
@@ -168,7 +223,8 @@ html body {
 }
 
 @media (max-width: 767px) {
-  .shell {
+  .shell,
+  .shell.collapsed {
     grid-template-columns: minmax(0, 1fr);
   }
   .sidebar {
