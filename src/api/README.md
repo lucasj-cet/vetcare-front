@@ -39,7 +39,9 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `tutors.remove(id)`                                    | `DELETE /tutors/:id` (409 se tiver consulta marcada)                                  | Excluir tutor                |
 | `pets.list({ search, page })`                          | `GET /pets?search=&page=` → `{ data, total, page, pageSize }` (com `petOwner`)        | Recepção › Cadastros         |
 | `pets.profile(id)`                                     | `GET /pets/:id/profile` (registros, vacinas, prescrições, exames, próximas consultas) | Prontuário, Ficha, Portal    |
-| `pets.save(data)`                                      | `POST /pets` · `PUT /pets/:id`                                                        | Cadastro de pet              |
+| `pets.get(id)`                                         | `GET /pets/:id` (com `petOwner`)                                                      | Ficha do pet                 |
+| `pets.create(data)`                                    | `POST /pets` com `petOwnerId` → `Pet`                                                 | Novo pet                     |
+| `pets.update(id, data)`                                | `PATCH /pets/:id` sem `petOwnerId` (o tutor não muda)                                 | Editar pet                   |
 | `pets.remove(id)`                                      | `DELETE /pets/:id`                                                                    | Excluir pet                  |
 | `appointments.range(from, to)`                         | `GET /appointments?from=&to=`                                                         | Agenda (dia/semana)          |
 | `appointments.requests()`                              | `GET /appointments?status=solicitada`                                                 | Agenda › Pedidos dos tutores |

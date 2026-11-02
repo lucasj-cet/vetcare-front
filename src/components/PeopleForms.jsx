@@ -13,10 +13,9 @@ import {
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
-import { api } from "../api";
 import { useCreatePetOwner, useUpdatePetOwner } from "../api/queries/petOwners";
-import { useSubmit } from "../hooks/useApi";
-import { act, toast } from "../lib/notify";
+import { useCreatePet, useUpdatePet } from "../api/queries/pets";
+import { toast } from "../lib/notify";
 import { isEmail, maskCpf, maskPhone, onlyDigits, toISO } from "../lib/format";
 import { FormActions } from "./ui";
 
@@ -252,20 +251,30 @@ function PetForm({ onClose, pet, tutorId }) {
     initialValues: petInitial(pet),
     validate: petRules(),
   });
-  const [saving, submit] = useSubmit();
-  const onSubmit = form.onSubmit((v) =>
-    submit(async () => {
-      const ok = await act(
-        api.pets.save({
-          id: pet?.id,
-          tutorId: pet?.tutorId ?? tutorId,
-          ...petPayload(v),
-        }),
-        pet ? "Dados do pet atualizados." : `${v.name.trim()} cadastrado.`,
-      );
-      if (ok) onClose();
-    }),
-  );
+  const create = useCreatePet({
+    onSuccess: (_, data) => {
+      toast.ok(`${data.name} cadastrado.`);
+      onClose();
+    },
+  });
+  const update = useUpdatePet({
+    onSuccess: () => {
+      toast.ok("Dados do pet atualizados.");
+      onClose();
+    },
+  });
+
+  const saving = create.isPending || update.isPending;
+
+  const onSubmit = form.onSubmit((v) => {
+    const data = petPayload(v);
+
+    if (pet) {
+      return update.mutate({ id: pet.id, ...data });
+    }
+
+    create.mutate({ tutorId, ...data });
+  });
   return (
     <form onSubmit={onSubmit} noValidate>
       <PetFields form={form} />

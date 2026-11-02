@@ -8,6 +8,7 @@ export const ENDPOINTS = {
   },
   pets: {
     list: "/pets",
+    create: "/pets",
     byId: (id) => `/pets/${id}`,
   },
 };

@@ -120,7 +120,71 @@ const matches = (search, ...fields) => {
   });
 };
 
+let nextId = 1000;
+
+const badRequest = (message) =>
+  HttpResponse.json({ statusCode: 400, message }, { status: 400 });
+
+const notFound = (message) =>
+  HttpResponse.json({ statusCode: 404, message }, { status: 404 });
+
+const findPet = (id) => {
+  for (const { pets, ...petOwner } of store.petOwners) {
+    if (petOwner.deletedAt) continue;
+    const pet = pets.find((p) => p.id === id);
+    if (pet) return { pet, petOwner };
+  }
+};
+
+const validatePet = (p) => {
+  if (!p.name?.trim() || !p.specie || !p.breed?.trim())
+    return "name, specie and breed are required";
+  if (p.weight != null && (typeof p.weight !== "number" || p.weight < 0))
+    return "weight must be a positive number";
+};
+
 export const petHandlers = [
+  http.post(`${API_URL}${ENDPOINTS.pets.create}`, async ({ request }) => {
+    const { petOwnerId, ...data } = await request.json();
+    const error =
+      validatePet(data) ?? (!petOwnerId && "petOwnerId is required");
+    if (error) return badRequest(error);
+
+    const petOwner = store.petOwners.find(
+      (o) => o.id === petOwnerId && !o.deletedAt,
+    );
+    if (!petOwner) return notFound("Pet owner not found");
+
+    const pet = { notes: "", ...data, id: `p${nextId++}` };
+    petOwner.pets.push(pet);
+    const { pets, ...owner } = petOwner;
+    return HttpResponse.json({ ...pet, petOwner: owner }, { status: 201 });
+  }),
+
+  http.get(`${API_URL}${ENDPOINTS.pets.byId(":id")}`, ({ params }) => {
+    const found = findPet(params.id);
+    if (!found) return notFound("Pet not found");
+    return HttpResponse.json({ ...found.pet, petOwner: found.petOwner });
+  }),
+
+  http.patch(
+    `${API_URL}${ENDPOINTS.pets.byId(":id")}`,
+    async ({ params, request }) => {
+      const found = findPet(params.id);
+      if (!found) return notFound("Pet not found");
+
+      // petOwnerId is ignored: a pet cannot change owner
+      const { name, specie, breed, sex, birthdate, weight, notes } =
+        await request.json();
+      const data = { name, specie, breed, sex, birthdate, weight, notes };
+      const error = validatePet(data);
+      if (error) return badRequest(error);
+
+      Object.assign(found.pet, data, { notes: notes ?? "" });
+      return HttpResponse.json({ ...found.pet, petOwner: found.petOwner });
+    },
+  ),
+
   http.get(`${API_URL}${ENDPOINTS.pets.list}`, ({ request }) => {
     const url = new URL(request.url);
     const search = url.searchParams.get("search") ?? "";
@@ -139,11 +203,6 @@ export const petHandlers = [
     });
   }),
 ];
-
-let nextId = 1000;
-
-const badRequest = (message) =>
-  HttpResponse.json({ statusCode: 400, message }, { status: 400 });
 
 export const petOwnerHandlers = [
   http.post(`${API_URL}${ENDPOINTS.petOwners.create}`, async ({ request }) => {

@@ -6,7 +6,9 @@ import {
   fromApiPage,
   fromApiPet,
   fromApiPetOwner,
+  toApiCreatePet,
   toApiCreatePetOwner,
+  toApiUpdatePet,
   toApiUpdatePetOwner,
 } from "./mappers";
 
@@ -117,9 +119,11 @@ export const pets = {
       fromApiPet,
     ),
   profile: (id) => call(() => petProfile(id)),
-  // POST /pets | PUT /pets/:id
-  save: ({ id, ...data }) =>
-    call(() => (id ? db.update("pets", id, data) : db.insert("pets", data))),
+  get: async (id) => fromApiPet(await http.get(ENDPOINTS.pets.byId(id))),
+  create: async (data) =>
+    fromApiPet(await http.post(ENDPOINTS.pets.create, toApiCreatePet(data))),
+  update: async (id, data) =>
+    fromApiPet(await http.patch(ENDPOINTS.pets.byId(id), toApiUpdatePet(data))),
   remove: (id) =>
     call(() => {
       db.update("pets", id, { deletedAt: dayjs().format("YYYY-MM-DDTHH:mm") });

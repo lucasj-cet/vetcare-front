@@ -38,6 +38,13 @@ const toApiNewPet = (p) => ({
   notes: p.alerts,
 });
 
+export const toApiCreatePet = ({ tutorId, ...p }) => ({
+  ...toApiNewPet(p),
+  petOwnerId: tutorId,
+});
+
+export const toApiUpdatePet = toApiNewPet;
+
 export const toApiCreatePetOwner = ({ pet, ...o }) => ({
   name: o.name,
   cpf: onlyDigits(o.cpf),
