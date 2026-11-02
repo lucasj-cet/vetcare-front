@@ -33,7 +33,9 @@ export function SessionProvider({ children }) {
       })
       .catch((e) => {
         if (cancelled) return;
-        if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) tokenStore.set(null);
+        if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) {
+          tokenStore.set(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
