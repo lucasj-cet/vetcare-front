@@ -23,10 +23,10 @@ import {
 } from "@tabler/icons-react";
 import { debounce, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { api } from "../../api";
-import { useUsers } from "../../api/queries/users";
+import { useInviteUser, useUsers } from "../../api/queries/users";
 import { useSession } from "../../auth/session";
 import { useSubmit } from "../../hooks/useApi";
-import { act } from "../../lib/notify";
+import { act, toast } from "../../lib/notify";
 import { fmtDateTime, isEmail, relDay } from "../../lib/format";
 import { ROLE_LABEL, USER_STATUS } from "../../lib/status";
 import {
@@ -277,35 +277,30 @@ function InviteModal({ opened, onClose }) {
 
 function InviteForm({ onClose }) {
   const form = useForm({
-    initialValues: { name: "", email: "", role: "recepcao", crmv: "" },
+    initialValues: { name: "", email: "", role: "recepcao" },
     validate: {
       name: (v) =>
         v.trim().split(" ").length < 2 ? "Informe nome e sobrenome" : null,
       email: (v) => (isEmail(v) ? null : "E-mail inválido"),
-      crmv: (v, values) =>
-        values.role === "vet" && !v.trim()
-          ? "Veterinários precisam do CRMV"
-          : null,
     },
   });
-  const [busy, submit] = useSubmit();
+  const invite = useInviteUser();
   return (
     <form
       noValidate
-      onSubmit={form.onSubmit((v) =>
-        submit(async () => {
-          const ok = await act(
-            api.staff.invite({
-              name: v.name.trim(),
-              email: v.email.trim().toLowerCase(),
-              role: v.role,
-              crmv: v.crmv.trim(),
-            }),
-            `Convite enviado para ${v.email.trim()}.`,
-          );
-          if (ok) onClose();
-        }),
-      )}
+      onSubmit={form.onSubmit(async (v) => {
+        try {
+          await invite.mutateAsync({
+            name: v.name.trim(),
+            email: v.email.trim().toLowerCase(),
+            role: v.role,
+          });
+        } catch {
+          return; // the global handler already showed the error
+        }
+        toast.ok(`Convite enviado para ${v.email.trim()}.`);
+        onClose();
+      })}
     >
       <SimpleGrid cols={{ base: 1, sm: 2 }}>
         <TextInput label="Nome completo" {...form.getInputProps("name")} />
@@ -320,17 +315,10 @@ function InviteForm({ onClose }) {
           allowDeselect={false}
           {...form.getInputProps("role")}
         />
-        {form.values.role === "vet" && (
-          <TextInput
-            label="CRMV"
-            placeholder="CRMV-SP 00.000"
-            {...form.getInputProps("crmv")}
-          />
-        )}
       </SimpleGrid>
       <FormActions
         onCancel={onClose}
-        loading={busy}
+        loading={invite.isPending}
         submitLabel="Enviar convite"
       />
     </form>
