@@ -33,10 +33,10 @@ export default function App() {
       <Route path="/convite/:token" element={<AcceptInvite />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-          <Route path="recepcao" element={<RoleGate role="recepcao" />}>
+          <Route path="recepcao" element={<RoleGate role="RECEP" />}>
             <Route path="pacientes" element={<Pacientes />} />
           </Route>
-          <Route path="admin" element={<RoleGate role="admin" />}>
+          <Route path="admin" element={<RoleGate role="ADMIN" />}>
             <Route path="pacientes" element={<Pacientes />} />
             <Route path="usuarios" element={<Usuarios />} />
           </Route>

@@ -45,7 +45,7 @@ import {
   Pill,
 } from "../../components/ui";
 
-const STAFF_ROLES = ["recepcao", "admin"].map((value) => ({
+const STAFF_ROLES = ["RECEP", "ADMIN"].map((value) => ({
   value,
   label: ROLE_LABEL[value],
 }));
@@ -103,11 +103,7 @@ export default function Usuarios() {
       </PageHeader>
       <div className="stack">
         <Kpis items={[{ label: "Usuários", value: allTotal ?? "—" }]} />
-        <Block
-          title="Equipe"
-          sub="Tutores entram pelo portal com o e-mail do cadastro e não aparecem aqui"
-          flush
-        >
+        <Block flush>
           <Group
             justify="space-between"
             px="lg"
@@ -282,7 +278,7 @@ function InviteModal({ opened, onClose }) {
 
 function InviteForm({ onClose }) {
   const form = useForm({
-    initialValues: { name: "", email: "", role: "recepcao" },
+    initialValues: { name: "", email: "", role: "RECEP" },
     validate: {
       name: (v) =>
         v.trim().split(" ").length < 2 ? "Informe nome e sobrenome" : null,

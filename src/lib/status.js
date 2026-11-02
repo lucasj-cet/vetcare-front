@@ -7,7 +7,9 @@ export const USER_STATUS = {
 };
 
 export const ROLE_LABEL = {
-  recepcao: "Recepcionista",
-  vet: "Veterinário",
-  admin: "Administrador",
+  RECEP: "Recepcionista",
+  VET: "Veterinário",
+  ADMIN: "Administrador",
 };
+
+export const SPECIES_LABEL = { DOG: "Cão", CAT: "Gato" };
