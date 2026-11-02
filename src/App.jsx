@@ -3,7 +3,7 @@ import { ROLES, useSession } from "./auth/session";
 import AppLayout from "./layout/AppLayout";
 import Usuarios from "./pages/admin/Usuarios";
 import Login from "./pages/Login";
-import Cadastros from "./pages/recepcao/Cadastros";
+import Pacientes from "./pages/recepcao/Pacientes";
 
 function RequireAuth() {
   const { user } = useSession();
@@ -32,10 +32,10 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route path="recepcao" element={<RoleGate role="recepcao" />}>
-            <Route path="cadastros" element={<Cadastros />} />
+            <Route path="pacientes" element={<Pacientes />} />
           </Route>
           <Route path="admin" element={<RoleGate role="admin" />}>
-            <Route path="cadastros" element={<Cadastros />} />
+            <Route path="pacientes" element={<Pacientes />} />
             <Route path="usuarios" element={<Usuarios />} />
           </Route>
         </Route>

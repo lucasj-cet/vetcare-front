@@ -26,7 +26,11 @@ import {
   usePetOwners,
 } from "../../api/queries/petOwners";
 import { useDeletePet, usePets } from "../../api/queries/pets";
-import { PetModal, PetOwnerModal } from "../../components/PeopleForms";
+import {
+  NewPatientModal,
+  PetModal,
+  PetOwnerModal,
+} from "../../components/PeopleForms";
 import {
   Async,
   Block,
@@ -43,7 +47,7 @@ import { toast } from "../../lib/notify";
 
 const SEARCH_DEBOUNCE_MS = 500;
 
-export default function Cadastros() {
+export default function Pacientes() {
   const [search, setSearch] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions({
@@ -53,7 +57,8 @@ export default function Cadastros() {
   );
   const [debounced] = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [petOwnerForm, setPetOwnerForm] = useState(null); // { petOwner? }
+  const [newPatient, setNewPatient] = useState(false);
+  const [petOwnerForm, setPetOwnerForm] = useState(null); // { petOwner }
   const [petForm, setPetForm] = useState(null); // { pet?, petOwnerId, petOwnerName }
   const [openPetOwner, setOpenPetOwner] = useState(null);
   const [toDelete, setToDelete] = useState(null); // { kind, row }
@@ -104,35 +109,32 @@ export default function Cadastros() {
 
   return (
     <>
-      <PageHeader title="Cadastros" finding="Tutores e pacientes da clínica">
+      <PageHeader title="Pacientes" finding="Pacientes e tutores da clínica">
         <Button
           leftSection={<IconPlus size={16} />}
-          onClick={() => setPetOwnerForm({})}
+          onClick={() => setNewPatient(true)}
         >
-          Novo cadastro
+          Novo paciente
         </Button>
       </PageHeader>
 
       <div className="stack">
         <Kpis
           items={[
-            { label: "Tutores", value: ownersTotal ?? "—" },
             { label: "Pacientes", value: petsTotal ?? "—" },
+            { label: "Tutores", value: ownersTotal ?? "—" },
           ]}
         />
 
         <Block flush>
           <Group
-            justify="flex-end"
+            justify="space-between"
             px="lg"
             py="sm"
             gap="xs"
             wrap="nowrap"
             style={{ borderBottom: "1px solid var(--vc-line)" }}
           >
-            {(pets.isLoading || pets.isPlaceholderData) && (
-              <Loader size="xs" aria-label="Carregando" />
-            )}
             <TextInput
               leftSection={<IconSearch size={15} />}
               placeholder="Nome, raça, tutor ou CPF"
@@ -144,6 +146,9 @@ export default function Cadastros() {
               w={{ base: "100%", sm: 300 }}
               aria-label="Buscar"
             />
+            {(pets.isLoading || pets.isPlaceholderData) && (
+              <Loader size="xs" aria-label="Carregando" />
+            )}
           </Group>
 
           <Async q={pets} rows={6}>
@@ -226,6 +231,10 @@ export default function Cadastros() {
         onEditPet={(p) => setPetForm({ pet: p })}
         onDelete={(kind, row) => setToDelete({ kind, row })}
       />
+      <NewPatientModal
+        opened={newPatient}
+        onClose={() => setNewPatient(false)}
+      />
       <PetOwnerModal
         opened={!!petOwnerForm}
         onClose={() => setPetOwnerForm(null)}
@@ -247,7 +256,7 @@ export default function Cadastros() {
       >
         {toDelete?.kind === "petOwner"
           ? `Excluir ${toDelete.row.name} e os pets cadastrados para ele? O histórico de atendimentos e pagamentos continua guardado.`
-          : `Excluir ${toDelete?.row.name} dos cadastros? O histórico clínico continua guardado.`}
+          : `Excluir ${toDelete?.row.name} da clínica? O histórico clínico continua guardado.`}
       </ConfirmDialog>
     </>
   );

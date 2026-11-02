@@ -21,7 +21,7 @@ exemplo são recriados a cada dia; o botão **Restaurar demonstração** (barra 
 
 | Perfil | Páginas |
 |---|---|
-| Recepcionista | **Agenda** (linha do tempo por veterinário, dia/semana, pedidos do portal, chegada, remarcar, cancelar) · **Cadastros** (tutores e pacientes, busca, cadastro tutor + pet, edição, exclusão) · **Caixa** (a receber, pagamentos do dia, baixa com troco e parcelas) |
+| Recepcionista | **Agenda** (linha do tempo por veterinário, dia/semana, pedidos do portal, chegada, remarcar, cancelar) · **Pacientes** (tutores e pacientes, busca, novo paciente com tutor novo ou já cadastrado, edição, exclusão) · **Caixa** (a receber, pagamentos do dia, baixa com troco e parcelas) |
 | Veterinário | **Atendimentos** (fila do dia e ficha: anamnese, histórico, vacinação, prescrição) · **Prontuários** · **Vacinas** (atrasadas, próximas, aplicadas) · **Prescrições** (rascunho, emissão, PDF) |
 | Administrador | **Dashboard** (faturamento, atendimentos, ticket, a receber, semanas, formas de pagamento) · **Relatórios** (CSV/PDF) · **Usuários** (convite, perfil, desativar) · **Financeiro** (receitas, despesas, saldo) |
 | Tutor | **Meus pets** · **Vacinas** (carteira e lembretes) · **Consultas** (pedir, acompanhar, cancelar) · **Receitas** (ver, compartilhar, PDF) |
