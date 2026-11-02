@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 import { useCreatePetOwner, useUpdatePetOwner } from "../api/queries/petOwners";
 import { useCreatePet, useUpdatePet } from "../api/queries/pets";
 import { toast } from "../lib/notify";
-import { isEmail, maskCpf, maskPhone, onlyDigits, toISO } from "../lib/format";
+import { hideCpf, isEmail, maskCpf, maskPhone, onlyDigits, toISO } from "../lib/format";
 import { FormActions } from "./ui";
 
 const petInitial = (p = {}) => ({
@@ -116,7 +116,7 @@ function PetOwnerForm({ onClose, petOwner }) {
   const form = useForm({
     initialValues: {
       name: petOwner?.name ?? "",
-      cpf: petOwner?.cpf ?? "",
+      cpf: hideCpf(petOwner?.cpf),
       phone: petOwner?.phone ?? "",
       email: petOwner?.email ?? "",
       address: petOwner?.address ?? "",
@@ -127,7 +127,7 @@ function PetOwnerForm({ onClose, petOwner }) {
       name: (v) =>
         v.trim().split(" ").length < 2 ? "Informe nome e sobrenome" : null,
       cpf: (v) =>
-        onlyDigits(v).length !== 11 ? "CPF precisa ter 11 dígitos" : null,
+        !isEdit && onlyDigits(v).length !== 11 ? "CPF precisa ter 11 dígitos" : null,
       phone: (v) => (onlyDigits(v).length < 10 ? "Telefone com DDD" : null),
       email: (v) => (!isEmail(v) ? "E-mail inválido" : null),
       pet: petRules((values) => values.withPet),

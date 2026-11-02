@@ -62,6 +62,12 @@ export function maskCpf(v = "") {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+// 123.456.789-10 -> 123.***.***-10
+export function hideCpf(v = "") {
+  const d = onlyDigits(v);
+  return d.length === 11 ? `${d.slice(0, 3)}.***.***-${d.slice(9)}` : "";
+}
+
 export function maskPhone(v = "") {
   const d = onlyDigits(v).slice(0, 11);
   if (d.length <= 10)
