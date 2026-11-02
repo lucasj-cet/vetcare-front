@@ -1,9 +1,10 @@
 import { ApiError } from "./errors";
+import { STATUS } from "./statusCodes";
 
 export function handleApiError(error, { navigate, logout }) {
   if (!(error instanceof ApiError)) return;
 
-  if (error.status === 401) {
+  if (error.status === STATUS.UNAUTHORIZED) {
     if (window.location.pathname === "/login") {
       return;
     }

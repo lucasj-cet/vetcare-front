@@ -9,6 +9,7 @@ import {
 } from "react";
 import { api } from "../api";
 import { ApiError } from "../api/errors";
+import { STATUS } from "../api/statusCodes";
 import { tokenStore } from "../api/http";
 
 export const ROLES = {
@@ -32,7 +33,7 @@ export function SessionProvider({ children }) {
       })
       .catch((e) => {
         if (cancelled) return;
-        if (e instanceof ApiError && e.status === 401) tokenStore.set(null);
+        if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) tokenStore.set(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

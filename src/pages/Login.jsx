@@ -3,6 +3,7 @@ import { useForm } from "@mantine/form";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { ApiError } from "../api/errors";
+import { STATUS } from "../api/statusCodes";
 import { ROLES, useSession } from "../auth/session";
 import { useSubmit } from "../hooks/useApi";
 import { isEmail } from "../lib/format";
@@ -33,7 +34,7 @@ export default function Login() {
         login(res);
         navigate(ROLES[res.user.role].home, { replace: true });
       } catch (e) {
-        if (e instanceof ApiError && e.status === 401) {
+        if (e instanceof ApiError && e.status === STATUS.UNAUTHORIZED) {
           toast.err(e, "E-mail ou senha incorretos.");
         } else {
           toast.err(e);

@@ -1,4 +1,5 @@
 import { ApiError } from "./errors";
+import { STATUS } from "./statusCodes";
 
 const BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
 const TOKEN_KEY = "vetcare.token";
@@ -23,7 +24,7 @@ async function request(method, path, { body, query } = {}) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const data = res.status === 204 ? null : await res.json().catch(() => null);
+  const data = res.status === STATUS.NO_CONTENT ? null : await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(res.status, data);
   return data;
 }
