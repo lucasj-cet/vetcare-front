@@ -1,13 +1,5 @@
-import {
-  Button,
-  PasswordInput,
-  Select,
-  Stack,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Button, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { ROLES, useSession } from "../auth/session";
@@ -86,9 +78,6 @@ export default function Login() {
             </Stack>
           </form>
         </div>
-        <Text size="xs" c="dimmed" ta="center" mt="md">
-          Ambiente de demonstração: os dados ficam guardados só neste navegador.
-        </Text>
       </div>
     </div>
   );
