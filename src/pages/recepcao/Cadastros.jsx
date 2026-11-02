@@ -28,6 +28,7 @@ import {
 import { useState } from "react";
 import { api } from "../../api";
 import { usePetOwners } from "../../api/queries/petOwners";
+import { usePets } from "../../api/queries/pets";
 import { PetModal, TutorModal } from "../../components/PeopleForms";
 import {
   Async,
@@ -44,7 +45,6 @@ import { useApi, useSubmit } from "../../hooks/useApi";
 import { age, fmtDate, kg } from "../../lib/format";
 import { act } from "../../lib/notify";
 
-const ROWS_PER_PAGE = 8;
 const TABS = ["tutores", "pacientes"];
 
 export default function Cadastros() {
@@ -67,20 +67,26 @@ export default function Cadastros() {
   const [toDelete, setToDelete] = useState(null); // { kind, row }
   const [deleting, submit] = useSubmit();
 
-  const petOwners = usePetOwners({ search: debounced, page });
+  const petOwners = usePetOwners({
+    search: debounced,
+    page,
+    enabled: tab === "tutores",
+  });
   const ownersTotal = usePetOwners().data?.total;
-  const pets = useApi(() => api.pets.list({ search: debounced }), [debounced]);
-  const allPets = useApi(() => api.pets.list(), []).data ?? [];
+  const pets = usePets({
+    search: debounced,
+    page,
+    enabled: tab === "pacientes",
+  });
+  const petsTotal = usePets().data?.total;
 
-  const isPetOwnersTab = tab === "tutores";
-  const petRows = pets.data ?? [];
-  const total = isPetOwnersTab ? (petOwners.data?.total ?? 0) : petRows.length;
-  const pageSize = isPetOwnersTab
-    ? (petOwners.data?.pageSize ?? ROWS_PER_PAGE)
-    : ROWS_PER_PAGE;
-  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const current = tab === "tutores" ? petOwners : pets;
+  const total = current.data?.total ?? 0;
+  const pageSize = current.data?.pageSize;
+  const pages =
+    total && pageSize ? Math.max(1, Math.ceil(total / pageSize)) : null;
   const petOwnerRows = petOwners.data?.rows ?? [];
-  const petShown = petRows.slice((page - 1) * pageSize, page * pageSize);
+  const petRows = pets.data?.rows ?? [];
 
   const remove = () =>
     submit(async () => {
@@ -137,11 +143,7 @@ export default function Cadastros() {
         <Kpis
           items={[
             { label: "Tutores", value: ownersTotal ?? "—" },
-            {
-              label: "Pacientes",
-              value: allPets.length,
-              hint: `${allPets.filter((p) => p.species === "Cão").length} cães · ${allPets.filter((p) => p.species === "Gato").length} gatos`,
-            },
+            { label: "Pacientes", value: petsTotal ?? "—" },
           ]}
         />
 
@@ -261,7 +263,7 @@ export default function Cadastros() {
                 />
               ) : (
                 <DataTable
-                  rows={petShown}
+                  rows={petRows}
                   empty={
                     search
                       ? `Nenhum paciente encontrado para "${search}".`
@@ -295,16 +297,6 @@ export default function Cadastros() {
                       label: "Peso",
                       num: true,
                       render: (p) => kg(p.weight),
-                    },
-                    {
-                      key: "last",
-                      label: "Última consulta",
-                      render: (p) =>
-                        p.lastVisit ? (
-                          fmtDate(p.lastVisit)
-                        ) : (
-                          <span className="faint">—</span>
-                        ),
                     },
                     {
                       key: "alerts",

@@ -12,6 +12,10 @@ export const fromApiPet = (p) => ({
   birth: p.birthdate,
   weight: p.weight,
   alerts: p.notes,
+  ...(p.petOwner && {
+    tutorId: p.petOwner.id,
+    tutor: { id: p.petOwner.id, name: p.petOwner.name },
+  }),
 });
 
 export const fromApiPetOwner = (o) => ({

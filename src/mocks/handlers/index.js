@@ -1,4 +1,4 @@
 import { authHandlers } from "./auth";
-import { petOwnerHandlers } from "./petOwners";
+import { petHandlers, petOwnerHandlers } from "./petOwners";
 
-export const handlers = [...authHandlers, ...petOwnerHandlers];
+export const handlers = [...authHandlers, ...petOwnerHandlers, ...petHandlers];

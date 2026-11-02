@@ -3,7 +3,7 @@ import { onlyDigits, todayISO } from "../lib/format";
 import { db } from "./db";
 import { ENDPOINTS } from "./endpoints";
 import { http } from "./http";
-import { fromApiPage, fromApiPetOwner } from "./mappers";
+import { fromApiPage, fromApiPet, fromApiPetOwner } from "./mappers";
 
 // ---------------------------------------------------------------------------
 // Serviços do VetCare. As telas só chamam estas funções, todas assíncronas.
@@ -73,19 +73,6 @@ export const staff = {
 };
 
 // ============================== tutores e pacientes ==============================
-function matches(search, ...fields) {
-  if (!search) return true;
-  const s = search.trim().toLowerCase();
-  const digits = onlyDigits(s);
-  return fields.some((f) => {
-    if (!f) return false;
-    const v = String(f).toLowerCase();
-    return (
-      v.includes(s) || (digits.length >= 3 && onlyDigits(v).includes(digits))
-    );
-  });
-}
-
 export const petOwners = {
   list: async ({ search, page } = {}) =>
     fromApiPage(
@@ -95,27 +82,6 @@ export const petOwners = {
 };
 
 export const tutors = {
-  list: ({ search } = {}) =>
-    call(() =>
-      db
-        .all("tutors")
-        .filter(alive)
-        .map((t) => ({
-          ...t,
-          pets: db.all("pets").filter((p) => p.tutorId === t.id && alive(p)),
-        }))
-        .filter((t) =>
-          matches(
-            search,
-            t.name,
-            t.cpf,
-            t.phone,
-            t.email,
-            ...t.pets.map((p) => p.name),
-          ),
-        )
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    ),
   get: (id) =>
     call(() => {
       const t = tutorById(id);
@@ -157,24 +123,10 @@ export const tutors = {
 };
 
 export const pets = {
-  list: ({ search, tutorId } = {}) =>
-    call(() =>
-      db
-        .all("pets")
-        .filter(alive)
-        .filter((p) => !tutorId || p.tutorId === tutorId)
-        .map((p) => {
-          const tutor = tutorById(p.tutorId);
-
-          return {
-            ...p,
-            tutor,
-          };
-        })
-        .filter((p) =>
-          matches(search, p.name, p.breed, p.tutor?.name, p.tutor?.phone),
-        )
-        .sort((a, b) => a.name.localeCompare(b.name)),
+  list: async ({ search, page } = {}) =>
+    fromApiPage(
+      await http.get(ENDPOINTS.pets.list, { search, page }),
+      fromApiPet,
     ),
   profile: (id) => call(() => petProfile(id)),
   // POST /pets | PUT /pets/:id

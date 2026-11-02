@@ -120,6 +120,26 @@ const matches = (search, ...fields) => {
   });
 };
 
+export const petHandlers = [
+  http.get(`${API_URL}${ENDPOINTS.pets.list}`, ({ request }) => {
+    const url = new URL(request.url);
+    const search = url.searchParams.get("search") ?? "";
+    const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+
+    const found = store.petOwners
+      .flatMap(({ pets, ...petOwner }) => pets.map((p) => ({ ...p, petOwner })))
+      .filter((p) => matches(search, p.name, p.breed, p.petOwner.name))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return HttpResponse.json({
+      data: found.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+      total: found.length,
+      page,
+      pageSize: PAGE_SIZE,
+    });
+  }),
+];
+
 export const petOwnerHandlers = [
   http.get(`${API_URL}${ENDPOINTS.petOwners.list}`, ({ request }) => {
     const url = new URL(request.url);

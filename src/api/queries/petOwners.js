@@ -7,8 +7,9 @@ export const petOwnerKeys = {
   detail: (id) => [...petOwnerKeys.all, "detail", id],
 };
 
-export const usePetOwners = ({ search = "", page = 1 } = {}) =>
+export const usePetOwners = ({ search = "", page = 1, enabled = true } = {}) =>
   useQuery({
+    enabled,
     queryKey: petOwnerKeys.list({ search, page }),
     queryFn: () => api.petOwners.list({ search, page }),
     placeholderData: keepPreviousData,
