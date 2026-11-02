@@ -44,9 +44,6 @@ export function SessionProvider({ children }) {
       session,
       role: session?.role,
       user,
-      viewer: session
-        ? { role: session.role, userId: session.userId, tutorId: user?.tutorId }
-        : null,
       login,
       logout,
     };
