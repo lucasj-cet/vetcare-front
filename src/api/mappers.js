@@ -61,6 +61,24 @@ export const toApiUpdatePetOwner = (o) => ({
   address: o.address,
 });
 
+// The page keeps its own status names; `peding_invite` is spelled as in the contract.
+const USER_STATUS_FROM_API = {
+  active: "ativo",
+  peding_invite: "convite",
+  pending_invite: "convite",
+  deactivated: "inativo",
+};
+
+export const fromApiUser = (u) => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  role: u.role,
+  status: USER_STATUS_FROM_API[u.status] ?? u.status,
+  lastSeen: u.lastAccessAt,
+  invitedAt: u.inviteSentAt,
+});
+
 export const fromApiPage = (res, map) => ({
   rows: res.data.map(map),
   total: res.total,

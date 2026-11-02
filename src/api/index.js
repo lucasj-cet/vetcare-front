@@ -6,6 +6,7 @@ import {
   fromApiPage,
   fromApiPet,
   fromApiPetOwner,
+  fromApiUser,
   toApiCreatePet,
   toApiCreatePetOwner,
   toApiUpdatePet,
@@ -44,7 +45,23 @@ export const auth = {
   me: () => http.get(ENDPOINTS.users.me),
 };
 
-// ============================== equipe ==============================
+// ============================== usuários ==============================
+export const users = {
+  list: async ({ search, page } = {}) =>
+    fromApiPage(
+      await http.get(ENDPOINTS.users.list, { search, page }),
+      fromApiUser,
+    ),
+  invite: ({ name, email, role }) =>
+    http.post(ENDPOINTS.users.invite, { name, email, role }),
+  update: (id, { name, role }) =>
+    http.patch(ENDPOINTS.users.byId(id), { name, role }),
+  deactivate: (id) => http.post(ENDPOINTS.users.deactivate(id)),
+  acceptInvite: (token, { password }) =>
+    http.post(ENDPOINTS.users.acceptInvite(token), { password }),
+};
+
+// ============================== equipe (ainda simulada) ==============================
 export const staff = {
   list: () => call(() => db.all("users").filter((u) => u.role !== "tutor")),
   invite: ({ name, email, role, crmv }) =>
@@ -102,6 +119,7 @@ export const pets = {
 
 export const api = {
   auth,
+  users,
   staff,
   petOwners,
   pets,
