@@ -111,6 +111,8 @@ export function PetOwnerModal({ opened, onClose, petOwner }) {
 }
 
 function PetOwnerForm({ onClose, petOwner }) {
+  const isEdit = Boolean(petOwner);
+
   const form = useForm({
     initialValues: {
       name: petOwner?.name ?? "",
@@ -142,7 +144,7 @@ function PetOwnerForm({ onClose, petOwner }) {
       email: v.email.trim().toLowerCase(),
       address: v.address.trim(),
     };
-    if (petOwner)
+    if (isEdit)
       return update.mutate(
         { id: petOwner.id, ...data },
         {
@@ -166,8 +168,6 @@ function PetOwnerForm({ onClose, petOwner }) {
       },
     );
   });
-
-  const isEdit = Boolean(petOwner);
 
   return (
     <form onSubmit={onSubmit} noValidate>
@@ -209,7 +209,7 @@ function PetOwnerForm({ onClose, petOwner }) {
         />
       </SimpleGrid>
 
-      {!petOwner && (
+      {!isEdit && (
         <>
           <Divider my="lg" />
           <Checkbox
