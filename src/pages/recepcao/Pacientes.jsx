@@ -43,6 +43,7 @@ import {
   PetAvatar,
 } from "../../components/ui";
 import { age, hideCpf, kg } from "../../lib/format";
+import { SPECIES_LABEL } from "../../lib/status";
 import { toast } from "../../lib/notify";
 
 const SEARCH_DEBOUNCE_MS = 500;
@@ -173,7 +174,7 @@ export default function Pacientes() {
                         <div>
                           <div className="cell-main">{p.name}</div>
                           <div className="cell-sub">
-                            {p.species} · {p.breed}
+                            {SPECIES_LABEL[p.species] ?? p.species} · {p.breed}
                           </div>
                         </div>
                       </Group>

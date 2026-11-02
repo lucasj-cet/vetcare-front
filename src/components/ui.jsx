@@ -170,7 +170,7 @@ export function PetAvatar({ pet, size = 36 }) {
     <PersonAvatar
       name={pet?.name ?? "?"}
       size={size}
-      color={pet?.species === "Gato" ? "grape" : "teal"}
+      color={pet?.species === "CAT" ? "grape" : "teal"}
     />
   );
 }

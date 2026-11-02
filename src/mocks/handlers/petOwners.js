@@ -6,10 +6,10 @@ const PAGE_SIZE = 8;
 
 const digits = (v = "") => v.replace(/\D/g, "");
 
-const pet = (id, name, specie, breed, sex, birthdate, weight, notes = "") => ({
+const pet = (id, name, species, breed, sex, birthdate, weight, notes = "") => ({
   id,
   name,
-  specie,
+  species,
   breed,
   sex,
   birthdate,
@@ -33,14 +33,14 @@ export const store = {
         pet(
           "p1",
           "Thor",
-          "Cão",
+          "DOG",
           "Golden Retriever",
-          "Macho",
+          "M",
           "2019-03-12",
           32.5,
           "Alergia a dipirona",
         ),
-        pet("p2", "Mel", "Gato", "SRD", "Fêmea", "2021-07-02", 4.2),
+        pet("p2", "Mel", "CAT", "SRD", "F", "2021-07-02", 4.2),
       ],
     },
     {
@@ -50,9 +50,7 @@ export const store = {
       phone: "11976543210",
       email: "carlos.mota@email.com",
       address: "Av. Paulista, 1000 · Bela Vista, São Paulo",
-      pets: [
-        pet("p3", "Bolt", "Cão", "Border Collie", "Macho", "2020-11-20", 18),
-      ],
+      pets: [pet("p3", "Bolt", "DOG", "Border Collie", "M", "2020-11-20", 18)],
     },
     {
       id: "po3",
@@ -65,9 +63,9 @@ export const store = {
         pet(
           "p4",
           "Luna",
-          "Gato",
+          "CAT",
           "Siamês",
-          "Fêmea",
+          "F",
           "2018-05-30",
           3.8,
           "Doença renal crônica",
@@ -81,103 +79,91 @@ export const store = {
       phone: "11954321098",
       email: "pedro.almeida@email.com",
       address: "Rua Augusta, 220 · Consolação, São Paulo",
-      pets: [pet("p5", "Pipo", "Cão", "Shih Tzu", "Macho", "2022-02-10", 6.5)],
+      pets: [pet("p5", "Pipo", "DOG", "Shih Tzu", "M", "2022-02-10", 6.5)],
     },
     // 16 more owners with 25 pets: 30 pets from 20 owners in total
     ...[
-      ["Fernanda Lima", "11122233344", [["Rex", "Cão", "SRD", "Macho", 8]]],
+      ["Fernanda Lima", "11122233344", [["Rex", "DOG", "SRD", "M", 8]]],
       [
         "Gustavo Rocha",
         "22233344455",
         [
-          ["Nina", "Gato", "Persa", "Fêmea", 4.1],
-          ["Zeus", "Cão", "Pastor Alemão", "Macho", 34],
+          ["Nina", "CAT", "Persa", "F", 4.1],
+          ["Zeus", "DOG", "Pastor Alemão", "M", 34],
         ],
       ],
-      [
-        "Helena Duarte",
-        "33344455566",
-        [["Amora", "Cão", "Poodle", "Fêmea", 5]],
-      ],
+      ["Helena Duarte", "33344455566", [["Amora", "DOG", "Poodle", "F", 5]]],
       [
         "Igor Menezes",
         "44455566677",
         [
-          ["Simba", "Gato", "SRD", "Macho", 5.3],
-          ["Nala", "Gato", "SRD", "Fêmea", 3.9],
+          ["Simba", "CAT", "SRD", "M", 5.3],
+          ["Nala", "CAT", "SRD", "F", 3.9],
         ],
       ],
       [
         "Juliana Castro",
         "55566677788",
         [
-          ["Pipoca", "Cão", "Beagle", "Fêmea", 11],
-          ["Mingau", "Gato", "Ragdoll", "Macho", 6],
+          ["Pipoca", "DOG", "Beagle", "F", 11],
+          ["Mingau", "CAT", "Ragdoll", "M", 6],
         ],
       ],
       [
         "Lucas Teixeira",
         "66677788899",
-        [["Bento", "Cão", "Labrador", "Macho", 29]],
+        [["Bento", "DOG", "Labrador", "M", 29]],
       ],
       [
         "Mariana Furtado",
         "77788899900",
         [
-          ["Frida", "Cão", "Dachshund", "Fêmea", 7.2],
-          ["Oliver", "Gato", "Maine Coon", "Macho", 7.8],
+          ["Frida", "DOG", "Dachshund", "F", 7.2],
+          ["Oliver", "CAT", "Maine Coon", "M", 7.8],
         ],
       ],
-      [
-        "Nelson Barros",
-        "88899900011",
-        [["Max", "Cão", "Rottweiler", "Macho", 41]],
-      ],
+      ["Nelson Barros", "88899900011", [["Max", "DOG", "Rottweiler", "M", 41]]],
       [
         "Olívia Ferraz",
         "99900011122",
         [
-          ["Bela", "Cão", "Yorkshire", "Fêmea", 3.1],
-          ["Fred", "Gato", "SRD", "Macho", 4.6],
+          ["Bela", "DOG", "Yorkshire", "F", 3.1],
+          ["Fred", "CAT", "SRD", "M", 4.6],
         ],
       ],
-      ["Paulo Nogueira", "10120230344", [["Toby", "Cão", "Pug", "Macho", 9.4]]],
+      ["Paulo Nogueira", "10120230344", [["Toby", "DOG", "Pug", "M", 9.4]]],
       [
         "Quitéria Lopes",
         "20230340455",
         [
-          ["Lola", "Cão", "Bulldog Francês", "Fêmea", 12],
-          ["Cleo", "Gato", "Siamês", "Fêmea", 3.6],
+          ["Lola", "DOG", "Bulldog Francês", "F", 12],
+          ["Cleo", "CAT", "Siamês", "F", 3.6],
         ],
       ],
-      ["Rafael Pinto", "30340450566", [["Duque", "Cão", "Boxer", "Macho", 27]]],
+      ["Rafael Pinto", "30340450566", [["Duque", "DOG", "Boxer", "M", 27]]],
       [
         "Sabrina Moraes",
         "40450560677",
         [
-          ["Maya", "Cão", "Spitz Alemão", "Fêmea", 3.4],
-          ["Tigre", "Gato", "Bengal", "Macho", 5.9],
+          ["Maya", "DOG", "Spitz Alemão", "F", 3.4],
+          ["Tigre", "CAT", "Bengal", "M", 5.9],
         ],
       ],
-      [
-        "Tiago Vasconcelos",
-        "50560670788",
-        [["Chico", "Gato", "SRD", "Macho", 5]],
-      ],
+      ["Tiago Vasconcelos", "50560670788", [["Chico", "CAT", "SRD", "M", 5]]],
       [
         "Úrsula Campos",
         "60670780899",
         [
-          ["Lord", "Cão", "Golden Retriever", "Macho", 33],
-          ["Safira", "Gato", "Azul Russo", "Fêmea", 4.3],
+          ["Lord", "DOG", "Golden Retriever", "M", 33],
+          ["Safira", "CAT", "Azul Russo", "F", 4.3],
         ],
       ],
       [
         "Vinícius Prado",
         "70780890900",
         [
-          ["Nico", "Cão", "Schnauzer", "Macho", 8.7],
-          ["Princesa", "Cão", "Lhasa Apso", "Fêmea", 6.1],
+          ["Nico", "DOG", "Schnauzer", "M", 8.7],
+          ["Princesa", "DOG", "Lhasa Apso", "F", 6.1],
         ],
       ],
     ].map(([name, cpf, pets], i) => ({
@@ -187,11 +173,11 @@ export const store = {
       phone: `1194000${1000 + i}`,
       email: `${name.split(" ")[0].toLowerCase()}@email.com`,
       address: "",
-      pets: pets.map(([petName, specie, breed, sex, weight]) =>
+      pets: pets.map(([petName, species, breed, sex, weight]) =>
         pet(
           `p${nextSeedPetId++}`,
           petName,
-          specie,
+          species,
           breed,
           sex,
           "2020-01-15",
@@ -229,8 +215,8 @@ const findPet = (id) => {
 };
 
 const validatePet = (p) => {
-  if (!p.name?.trim() || !p.specie || !p.breed?.trim())
-    return "name, specie and breed are required";
+  if (!p.name?.trim() || !p.species || !p.breed?.trim())
+    return "name, species and breed are required";
   if (p.weight != null && (typeof p.weight !== "number" || p.weight < 0))
     return "weight must be a positive number";
 };
@@ -266,9 +252,9 @@ export const petHandlers = [
       if (!found) return notFound("Pet not found");
 
       // petOwnerId is ignored: a pet cannot change owner
-      const { name, specie, breed, sex, birthdate, weight, notes } =
+      const { name, species, breed, sex, birthdate, weight, notes } =
         await request.json();
-      const data = { name, specie, breed, sex, birthdate, weight, notes };
+      const data = { name, species, breed, sex, birthdate, weight, notes };
       const error = validatePet(data);
       if (error) return badRequest(error);
 
@@ -323,7 +309,7 @@ export const petOwnerHandlers = [
     if (!/^\d{11}$/.test(cpf ?? "")) return badRequest("cpf must be 11 digits");
     if (!/^\d{10,11}$/.test(phone ?? ""))
       return badRequest("phone must be 10 or 11 digits");
-    if (pets.some((p) => !p.name?.trim() || !p.specie || !p.breed))
+    if (pets.some((p) => !p.name?.trim() || !p.species || !p.breed))
       return badRequest("invalid pet");
 
     if (store.petOwners.some((o) => !o.deletedAt && o.cpf === cpf))

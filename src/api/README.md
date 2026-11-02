@@ -11,16 +11,15 @@ Configuração: coloque o endereço da API em `.env` → `VITE_API_URL=https://.
 
 A tradução fica em `mappers.js`; as telas continuam usando os nomes antigos nos campos abaixo.
 
-| API                                                             | Telas                           |
-| --------------------------------------------------------------- | ------------------------------- |
-| `specie`                                                        | `species`                       |
-| `birthdate` (`YYYY-MM-DD`)                                      | `birth`                         |
-| `notes`                                                         | `alerts`                        |
-| `petOwner` / `petOwnerId`                                       | `petOwner` / `petOwnerId`       |
-| `cpf`, `phone` (só dígitos)                                     | mascarados para exibição        |
-| `{ data, total, page, pageSize }`                               | `{ rows, total, pageSize }`     |
-| `status` do usuário: `active` / `peding_invite` / `deactivated` | `ativo` / `convite` / `inativo` |
-| `lastAccessAt` / `inviteSentAt`                                 | `lastSeen` / `invitedAt`        |
+| API                                                              | Telas                           |
+| ---------------------------------------------------------------- | ------------------------------- |
+| `birthdate` (`YYYY-MM-DD`)                                       | `birth`                         |
+| `notes`                                                          | `alerts`                        |
+| `petOwner` / `petOwnerId`                                        | `petOwner` / `petOwnerId`       |
+| `cpf`, `phone` (só dígitos)                                      | mascarados para exibição        |
+| `{ data, total, page, pageSize }`                                | `{ rows, total, pageSize }`     |
+| `status` do usuário: `ACTIVE` / `PENDING_INVITE` / `DEACTIVATED` | `ativo` / `convite` / `inativo` |
+| `lastAccessAt` / `inviteSentAt`                                  | `lastSeen` / `invitedAt`        |
 
 Ao enviar, CPF e telefone vão só com dígitos, o CPF não é editável (o `PATCH` do tutor não o envia) e o tutor de um pet não muda (o `PATCH` do pet não envia `petOwnerId`).
 
@@ -34,7 +33,7 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `auth.me()`                                            | `GET /users/me` → `{ id, name, email, role }`                                        | Sessão (ao recarregar)       |
 | `users.list({ search, page })`                         | `GET /users?search=&page=` → `{ data, total, page, pageSize }` (só admin; sem senha) | Admin › Usuários             |
 | `users.invite({ name, email, role })`                  | `POST /users/invite` (só admin; 409 se o e-mail já existir)                          | Admin › Convidar usuário     |
-| `users.update(id, { name, role })`                     | `PATCH /users/:id` (só admin; e-mail não é editável)                                 | Admin › Editar usuário      |
+| `users.update(id, { name, role })`                     | `PATCH /users/:id` (só admin; e-mail não é editável)                                 | Admin › Editar usuário       |
 | `users.deactivate(id)`                                 | `POST /users/:id/deactivate` (só admin)                                              | Admin › Desativar acesso     |
 | `users.acceptInvite(token, { password })`              | `POST /users/invite/:token/accept` → `{ token }` (pública)                           | Página `/convite/:token`     |
 | `petOwners.list({ search, page })`                     | `GET /pet-owners?search=&page=` → `{ data, total, page, pageSize }` (com `pets[]`)   | Recepção › Pacientes         |

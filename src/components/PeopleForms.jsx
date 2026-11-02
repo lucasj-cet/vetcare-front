@@ -40,11 +40,21 @@ import {
 } from "../lib/format";
 import { Facts, FormActions } from "./ui";
 
+const SPECIES_OPTIONS = [
+  { value: "DOG", label: "Cão" },
+  { value: "CAT", label: "Gato" },
+];
+
+const SEX_OPTIONS = [
+  { value: "M", label: "Macho" },
+  { value: "F", label: "Fêmea" },
+];
+
 const petInitial = (p = {}) => ({
   name: p.name ?? "",
-  species: p.species ?? "Cão",
+  species: p.species ?? "DOG",
   breed: p.breed ?? "",
-  sex: p.sex ?? "Macho",
+  sex: p.sex ?? "M",
   birth: p.birth ? dayjs(p.birth).toDate() : null,
   weight: p.weight ?? "",
   alerts: p.alerts ?? "",
@@ -76,7 +86,7 @@ function PetFields({ form, prefix = "" }) {
         <Text size="sm" fw={500} mb={4}>
           Espécie
         </Text>
-        <SegmentedControl fullWidth data={["Cão", "Gato"]} {...f("species")} />
+        <SegmentedControl fullWidth data={SPECIES_OPTIONS} {...f("species")} />
       </div>
       <TextInput
         label="Raça"
@@ -85,7 +95,7 @@ function PetFields({ form, prefix = "" }) {
       />
       <Select
         label="Sexo"
-        data={["Macho", "Fêmea"]}
+        data={SEX_OPTIONS}
         allowDeselect={false}
         {...f("sex")}
       />
