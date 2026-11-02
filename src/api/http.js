@@ -1,6 +1,4 @@
-// Cliente HTTP para quando a API do VetCare estiver disponível.
-// Uso: const tutors = await http.get('/tutors', { search });
-// Ainda não é usado pelas telas: os serviços de index.js respondem com os dados de demonstração.
+import { ApiError } from "./errors";
 
 const BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
 const TOKEN_KEY = "vetcare.token";
@@ -25,17 +23,8 @@ async function request(method, path, { body, query } = {}) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (res.status === 401) {
-    tokenStore.set(null);
-    window.location.assign("/login");
-  }
   const data = res.status === 204 ? null : await res.json().catch(() => null);
-  if (!res.ok) {
-    const e = new Error(data?.message ?? res.statusText);
-    e.status = res.status;
-    e.userMessage = data?.message;
-    throw e;
-  }
+  if (!res.ok) throw new ApiError(res.status, data);
   return data;
 }
 

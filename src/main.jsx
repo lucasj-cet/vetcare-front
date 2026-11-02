@@ -11,6 +11,7 @@ import "@mantine/notifications/styles.css";
 import "./styles.css";
 import { theme } from "./theme";
 import { SessionProvider } from "./auth/session";
+import ApiErrorHandler from "./api/ApiErrorHandler";
 import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
           <SessionProvider>
+            <ApiErrorHandler />
             <App />
           </SessionProvider>
         </BrowserRouter>
