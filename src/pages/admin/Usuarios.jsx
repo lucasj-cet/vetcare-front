@@ -9,6 +9,7 @@ import {
   Pagination,
   Select,
   SimpleGrid,
+  Stack,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -19,7 +20,7 @@ import {
   IconPlus,
   IconSearch,
   IconUserOff,
-  IconUserCog,
+  IconPencil,
 } from "@tabler/icons-react";
 import { debounce, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import {
@@ -54,7 +55,7 @@ const SEARCH_DEBOUNCE_MS = 500;
 export default function Usuarios() {
   const { user: me } = useSession();
   const [invite, setInvite] = useState(false);
-  const [roleFor, setRoleFor] = useState(null);
+  const [editing, setEditing] = useState(null);
   const [deactivate, setDeactivate] = useState(null);
   const deactivateUser = useDeactivateUser();
 
@@ -202,10 +203,10 @@ export default function Usuarios() {
                           </Menu.Target>
                           <Menu.Dropdown>
                             <Menu.Item
-                              leftSection={<IconUserCog size={15} />}
-                              onClick={() => setRoleFor(u)}
+                              leftSection={<IconPencil size={15} />}
+                              onClick={() => setEditing(u)}
                             >
-                              Alterar perfil
+                              Editar usuário
                             </Menu.Item>
                             {u.status !== "inativo" && (
                               <Menu.Item
@@ -251,10 +252,10 @@ export default function Usuarios() {
       </div>
 
       <InviteModal opened={invite} onClose={() => setInvite(false)} />
-      <RoleModal
-        key={roleFor?.id}
-        user={roleFor}
-        onClose={() => setRoleFor(null)}
+      <EditUserModal
+        key={editing?.id}
+        user={editing}
+        onClose={() => setEditing(null)}
       />
       <ConfirmDialog
         opened={!!deactivate}
@@ -329,51 +330,60 @@ function InviteForm({ onClose }) {
   );
 }
 
-function RoleModal({ user, onClose }) {
-  const [role, setRole] = useState(null);
-  const updateUser = useUpdateUser();
+function EditUserModal({ user, onClose }) {
   return (
     <Modal
       opened={!!user}
       onClose={onClose}
-      title={user ? `Perfil de ${user.name}` : ""}
-      size="sm"
+      title={user ? `Editar ${user.name}` : ""}
+      size="md"
     >
-      {user && (
-        <>
-          <Select
-            label="Perfil de acesso"
-            data={STAFF_ROLES}
-            defaultValue={user.role}
-            onChange={setRole}
-            allowDeselect={false}
-          />
-          <Group justify="flex-end" mt="lg">
-            <Button variant="default" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button
-              loading={updateUser.isPending}
-              disabled={!role || role === user.role}
-              onClick={async () => {
-                try {
-                  await updateUser.mutateAsync({
-                    id: user.id,
-                    name: user.name,
-                    role,
-                  });
-                } catch {
-                  return; // the global handler already showed the error
-                }
-                toast.ok("Perfil alterado.");
-                onClose();
-              }}
-            >
-              Salvar
-            </Button>
-          </Group>
-        </>
-      )}
+      {user && <EditUserForm user={user} onClose={onClose} />}
     </Modal>
+  );
+}
+
+function EditUserForm({ user, onClose }) {
+  const form = useForm({
+    initialValues: { name: user.name, role: user.role },
+    validate: {
+      name: (v) =>
+        v.trim().split(" ").length < 2 ? "Informe nome e sobrenome" : null,
+    },
+  });
+  const updateUser = useUpdateUser();
+  return (
+    <form
+      noValidate
+      onSubmit={form.onSubmit(async (v) => {
+        try {
+          await updateUser.mutateAsync({
+            id: user.id,
+            name: v.name.trim(),
+            role: v.role,
+          });
+        } catch {
+          return; // the global handler already showed the error
+        }
+        toast.ok("Usuário atualizado.");
+        onClose();
+      })}
+    >
+      <Stack gap="md">
+        <TextInput label="Nome completo" {...form.getInputProps("name")} />
+        <TextInput label="E-mail" value={user.email} disabled readOnly />
+        <Select
+          label="Perfil de acesso"
+          data={STAFF_ROLES}
+          allowDeselect={false}
+          {...form.getInputProps("role")}
+        />
+      </Stack>
+      <FormActions
+        onCancel={onClose}
+        loading={updateUser.isPending}
+        submitLabel="Salvar"
+      />
+    </form>
   );
 }

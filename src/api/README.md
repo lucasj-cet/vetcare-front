@@ -34,7 +34,7 @@ Erros: se a API devolver `{ "message": "..." }`, o texto aparece no aviso vermel
 | `auth.me()`                                            | `GET /users/me` → `{ id, name, email, role }`                                        | Sessão (ao recarregar)       |
 | `users.list({ search, page })`                         | `GET /users?search=&page=` → `{ data, total, page, pageSize }` (só admin; sem senha) | Admin › Usuários             |
 | `users.invite({ name, email, role })`                  | `POST /users/invite` (só admin; 409 se o e-mail já existir)                          | Admin › Convidar usuário     |
-| `users.update(id, { name, role })`                     | `PATCH /users/:id` (só admin; e-mail não é editável)                                 | Admin › Alterar perfil       |
+| `users.update(id, { name, role })`                     | `PATCH /users/:id` (só admin; e-mail não é editável)                                 | Admin › Editar usuário      |
 | `users.deactivate(id)`                                 | `POST /users/:id/deactivate` (só admin)                                              | Admin › Desativar acesso     |
 | `users.acceptInvite(token, { password })`              | `POST /users/invite/:token/accept` → `{ token }` (pública)                           | Página `/convite/:token`     |
 | `petOwners.list({ search, page })`                     | `GET /pet-owners?search=&page=` → `{ data, total, page, pageSize }` (com `pets[]`)   | Recepção › Pacientes         |
