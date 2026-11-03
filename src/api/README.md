@@ -1,7 +1,7 @@
 # Camada de API do front
 
 As telas **nunca** chamam `fetch` direto: elas usam as funções de `index.js` (todas devolvem `Promise`).
-Todas as funções (`auth`, `users`, `petOwners`, `pets`) usam a API real (`http.js` + `ENDPOINTS`); em desenvolvimento as rotas são simuladas pelo MSW (`src/mocks/handlers/`).
+Todas as funções (`auth`, `users`, `petOwners`, `pets`) usam a API real (`http.js` + `ENDPOINTS`); as rotas só são simuladas pelo MSW (`src/mocks/handlers/`) quando `VITE_ENABLE_MSW=true`.
 
 As telas não chamam `index.js` direto: usam os hooks do React Query em `src/api/queries/` (`usePetOwners`, `useCreatePet`, `useUsers`, ...), que guardam as chaves de cache e invalidam as listas após cada mutação.
 

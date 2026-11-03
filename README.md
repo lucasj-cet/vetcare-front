@@ -43,7 +43,7 @@ cobrança para o caixa; o caixa alimenta o dashboard e o financeiro.
 
 Toda a comunicação passa por `src/api/index.js`. O passo a passo e a rota sugerida para cada
 função estão em [`src/api/README.md`](src/api/README.md). Copie `.env.example` para `.env` e
-preencha `VITE_API_URL`.
+preencha `VITE_API_URL`. O MSW (API simulada) liga com `VITE_ENABLE_MSW=true`; em `npm run dev` ele já vem ligado por `.env.development`. Para usar a API real, crie `.env.local` com `VITE_ENABLE_MSW=false`.
 
 ## Estrutura
 
