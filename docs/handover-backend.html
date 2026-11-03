@@ -1,0 +1,393 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>VetCare · Handover para o back-end</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+@page { size: A4; margin: 18mm 18mm 20mm; @bottom-left{content:"VetCare · Handover para o back-end";font:8pt Inter,sans-serif;color:#6b7f7c} @bottom-right{content:counter(page);font:8pt Inter,sans-serif;color:#6b7f7c} }
+@page :first { margin:0; @bottom-left{content:none} @bottom-right{content:none} }
+:root{--teal:#087f76;--teal-d:#065f58;--teal-l:#e3f3f1;--teal-xl:#f2faf9;--ink:#12312e;--ink-2:#3d5653;--muted:#6b7f7c;--line:#d9e5e3}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:10pt;line-height:1.5;background:#fff}
+.cover{background:var(--teal);color:#fff;width:210mm;height:297mm;position:relative;page-break-after:always;break-after:page}
+.cover .top{padding:22mm 20mm 0;display:flex;align-items:center;gap:4mm;font-weight:700;font-size:13pt}
+.logo{width:12mm;height:12mm;border-radius:3mm;background:#fff;display:grid;place-items:center}
+.cover h1{font-size:46pt;line-height:1.02;letter-spacing:-.035em;font-weight:800;padding:60mm 20mm 0}
+.cover .sub{font-size:14pt;padding:8mm 20mm 0;max-width:160mm;opacity:.92;line-height:1.45}
+.cover .meta{position:absolute;left:20mm;right:20mm;bottom:16mm;display:flex;gap:12mm;font-size:9pt}
+.cover .meta b{display:block;font-size:7.5pt;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-weight:600;margin-bottom:1mm}
+h2{font-size:18pt;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:9mm 0 3mm;padding-top:2mm;break-after:avoid}
+h2 .num{display:block;font-size:9pt;font-weight:700;color:var(--teal);letter-spacing:.08em;margin-bottom:1mm}
+h3{font-size:11.5pt;font-weight:700;margin:6mm 0 2mm;break-after:avoid}
+p{margin:2mm 0} ul,ol{margin:2mm 0 2mm 5mm} li{margin:1mm 0}
+a{color:var(--teal-d);font-weight:600;text-decoration:none}
+code{font-family:Consolas,monospace;font-size:8.6pt;background:var(--teal-xl);border:1px solid var(--line);border-radius:3px;padding:0 3px;overflow-wrap:anywhere}
+pre{background:var(--teal-xl);border-left:1mm solid var(--teal);border-radius:0 2mm 2mm 0;padding:3mm 4mm;margin:3mm 0;break-inside:avoid;white-space:pre-wrap;overflow-wrap:anywhere}
+pre code{background:none;border:0;padding:0;font-size:8.4pt;line-height:1.45}
+table{width:100%;border-collapse:collapse;font-size:8.8pt;margin:3mm 0}
+th{text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:2mm 2.5mm;border-bottom:1.5px solid var(--ink)}
+td{padding:2mm 2.5mm;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+td:first-child{font-weight:600} tr{break-inside:avoid}
+strong{font-weight:700}
+h2 code,h3 code{font-size:inherit;font-weight:700;background:var(--teal-l);border-color:transparent;padding:0 2mm}
+p:has(+pre){break-after:avoid}
+</style></head><body>
+<section class="cover"><div class="top"><div class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#087f76" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12.572l-7.5 7.428l-7.5-7.428a5 5 0 1 1 7.5-6.566a5 5 0 1 1 7.5 6.572"/></svg></div>VetCare</div>
+<h1>Handover<br>para o back-end</h1>
+<p class="sub">O contrato que o front assume da API (requests e responses), o que mudou em relação ao que já existe e tudo o que precisa ser entregue no VetCare-api.</p>
+<div class="meta"><div><b>Data</b>2 de novembro de 2026</div><div><b>Front em produção</b>vetcare-aal.vercel.app</div><div><b>Para</b>VetCare-api</div></div></section>
+<main><p>O front (React) está pronto e roda hoje contra um servidor de mock (MSW). Este documento lista <strong>tudo o que o front assume da API</strong> (requests e responses) e <strong>o que precisa ser entregue</strong> no VetCare-api.</p>
+<h2><span class="num">1</span>Deploy (ação necessária)</h2>
+<ol>
+<li>Fazer o deploy do VetCare-api e <strong>passar a URL pública</strong> para quem for configurar o front (eu ou Lucas).</li>
+<li>Essa URL entra na variável <code>VITE_API_URL</code> do projeto no Vercel e <code>VITE_ENABLE_MSW</code> passa para <code>false</code> (hoje está <code>true</code>, então o front de produção usa a API simulada). Depois disso o front é redeployado.</li>
+<li><strong>Front em produção:</strong> <code>https://vetcare-aal.vercel.app</code>. Use essa URL como <code>frontEndUrl</code> nos links de convite (<code>https://vetcare-aal.vercel.app/convite/{token}</code>) e no CORS.</li>
+<li>Variáveis de ambiente do back que precisam existir no deploy: <code>DATABASE_URL</code>, <code>JWT_SECRET</code> e as do e-mail de convite. Rodar as migrations e o seed (seção 7) no banco de produção.</li>
+</ol>
+<h2><span class="num">2</span>Convenções gerais</h2>
+<h3>Autenticação (JWT)</h3>
+<ul>
+<li>O login devolve um JWT em <code>access_token</code>. O front guarda esse valor em <code>localStorage</code> (chave <code>vetcare.token</code>) e <strong>não o decodifica</strong>; os dados do usuário vêm do campo <code>user</code> da resposta do login e do aceite do convite, e de <code>GET /users/me</code> ao recarregar a página.</li>
+<li>Em <strong>toda</strong> requisição depois do login o front envia:</li>
+</ul>
+<pre><code>Authorization: Bearer &lt;access_token&gt;
+</code></pre>
+<ul>
+<li>Não há cookies nem refresh token. Rotas públicas (sem header): <code>POST /auth/login</code> e <code>POST /users/invite/{token}/accept</code>.</li>
+<li><code>401</code> = token ausente, inválido ou expirado (o front faz logout e volta para <code>/login</code>). Usuário logado sem permissão para a rota = <code>403</code>. Hoje o JWT expira em 1h; ao expirar, o usuário volta ao login (aceitável).</li>
+<li>Usuário <code>DEACTIVATED</code> com token ainda válido deve receber <code>401</code> em <code>GET /users/me</code>.</li>
+</ul>
+<h3>Headers e CORS</h3>
+<p>Toda requisição leva <code>Content-Type: application/json</code> (inclusive GET e DELETE, sem body). Libere no CORS:</p>
+<ul>
+<li>Origens: <code>https://vetcare-aal.vercel.app</code> e <code>http://localhost:5181</code> (dev).</li>
+<li>Métodos: <code>GET, POST, PATCH, DELETE, OPTIONS</code>.</li>
+<li>Headers: <code>Authorization, Content-Type</code>.</li>
+</ul>
+<p><strong>Hoje o CORS não está habilitado em <code>main.ts</code>.</strong></p>
+<h3>Erros</h3>
+<p>Corpo JSON com <code>message</code> em português. Pode ser uma string ou, como o <code>ValidationPipe</code> do Nest já faz por padrão, um <strong>array de strings</strong>: nesse caso o front mostra só a primeira mensagem. Não é preciso customizar o pipe.</p>
+<pre><code>{ &quot;message&quot;: &quot;Já existe um tutor com este CPF.&quot; }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td>validação</td>
+</tr>
+<tr>
+<td>401</td>
+<td>sem sessão, token inválido, credenciais inválidas</td>
+</tr>
+<tr>
+<td>403</td>
+<td>sem permissão para a rota</td>
+</tr>
+<tr>
+<td>404</td>
+<td>não encontrado (ou soft-deleted)</td>
+</tr>
+<tr>
+<td>409</td>
+<td>conflito (CPF ou e-mail duplicado)</td>
+</tr>
+</tbody></table>
+<h3>Paginação e busca</h3>
+<ul>
+<li><code>page</code> começa em 1 (padrão 1). <code>search</code> é opcional; vazio equivale a ausente.</li>
+<li>A resposta das listas é sempre o envelope abaixo. <code>total</code> é o número de registros que casam com o <code>search</code> (não o tamanho da página); <code>pageSize</code> é o tamanho da página (o front lê o valor, pode ser 8).</li>
+</ul>
+<pre><code>{ &quot;data&quot;: [ ... ], &quot;total&quot;: 20, &quot;page&quot;: 1, &quot;pageSize&quot;: 8 }
+</code></pre>
+<h3>Formatos</h3>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Formato</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cpf</code>, <code>phone</code></td>
+<td>só dígitos (ex.: <code>&quot;12345678901&quot;</code>); o front aplica a máscara</td>
+</tr>
+<tr>
+<td><code>birthdate</code></td>
+<td><code>&quot;YYYY-MM-DD&quot;</code></td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td>número em kg (ex.: <code>4.2</code>)</td>
+</tr>
+<tr>
+<td><code>sex</code></td>
+<td><code>&quot;M&quot;</code> ou <code>&quot;F&quot;</code></td>
+</tr>
+<tr>
+<td><code>species</code></td>
+<td><code>&quot;DOG&quot;</code> ou <code>&quot;CAT&quot;</code> (a UI mostra &quot;Cão&quot; e &quot;Gato&quot;)</td>
+</tr>
+<tr>
+<td>timestamps</td>
+<td>ISO 8601 com timezone (ex.: <code>&quot;2026-11-02T14:30:00.000Z&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>string (UUID). <strong>Todo objeto de usuário devolvido pela API inclui <code>id</code></strong>: login, <code>GET /users/me</code>, aceite do convite e a lista de usuários.</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td><code>&quot;ADMIN&quot;</code>, <code>&quot;RECEP&quot;</code> ou <code>&quot;VET&quot;</code> (o front só oferece <code>ADMIN</code> e <code>RECEP</code>)</td>
+</tr>
+</tbody></table>
+<h3>Regra de senha forte</h3>
+<p>Aplicada no aceite do convite. O front valida antes de enviar; <strong>a API deve aplicar a mesma regra</strong> (<code>400</code> com <code>message</code> em português se falhar):</p>
+<ul>
+<li>mínimo de 8 caracteres;</li>
+<li>pelo menos uma letra minúscula, uma maiúscula, um número e um símbolo.</li>
+</ul>
+<p>No <code>POST /auth/login</code> <strong>não</strong> valide a força da senha (contas antigas ou do seed podem não seguir a regra); só exija o campo preenchido.</p>
+<h2><span class="num">3</span>Autenticação</h2>
+<h3><code>POST /auth/login</code> (público)</h3>
+<p>Request body:</p>
+<pre><code class="language-json">{ &quot;email&quot;: &quot;admin@vetcare.com.br&quot;, &quot;password&quot;: &quot;string&quot; }
+</code></pre>
+<p>Response <code>200</code>:</p>
+<pre><code class="language-json">{
+  &quot;access_token&quot;: &quot;eyJhbGciOi...&quot;,
+  &quot;user&quot;: {
+    &quot;id&quot;: &quot;uuid&quot;,
+    &quot;name&quot;: &quot;Renata Freitas&quot;,
+    &quot;email&quot;: &quot;admin@vetcare.com.br&quot;,
+    &quot;role&quot;: &quot;ADMIN&quot;
+  }
+}
+</code></pre>
+<ul>
+<li><code>401</code> para e-mail inexistente, senha errada, usuário <code>DEACTIVATED</code> ou <code>PENDING_INVITE</code>. Use a <strong>mesma</strong> mensagem nos casos (ex.: &quot;E-mail e/ou senha incorretos.&quot;), para não revelar quais e-mails existem. O front mostra a sua própria mensagem no 401 do login.</li>
+<li>Atualiza <code>lastAccessAt</code> do usuário.</li>
+</ul>
+<h3><code>GET /users/me</code> (autenticado)</h3>
+<p>Sem body e sem query. Response <code>200</code> (sempre com <code>id</code>):</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;uuid&quot;,
+  &quot;name&quot;: &quot;Renata Freitas&quot;,
+  &quot;email&quot;: &quot;admin@vetcare.com.br&quot;,
+  &quot;role&quot;: &quot;ADMIN&quot;
+}
+</code></pre>
+<p><code>401</code> se o token for inválido/expirado ou o usuário estiver desativado. É chamado a cada recarga da página para reidratar a sessão.</p>
+<h2><span class="num">4</span>Usuários (todas as rotas exigem <code>ADMIN</code>, exceto o aceite do convite)</h2>
+<p>Objeto <code>User</code> (nunca inclui senha nem token de convite):</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;uuid&quot;,
+  &quot;name&quot;: &quot;Juliana Prado&quot;,
+  &quot;email&quot;: &quot;recepcao@vetcare.com.br&quot;,
+  &quot;role&quot;: &quot;RECEP&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;lastAccessAt&quot;: &quot;2026-11-01T10:00:00.000Z&quot;,
+  &quot;inviteSentAt&quot;: null
+}
+</code></pre>
+<ul>
+<li><code>status</code>: <code>&quot;ACTIVE&quot; | &quot;PENDING_INVITE&quot; | &quot;DEACTIVATED&quot;</code> (exatamente essa grafia).</li>
+<li><code>lastAccessAt</code> e <code>inviteSentAt</code>: ISO ou <code>null</code>.</li>
+</ul>
+<h3><code>GET /users?search=&amp;page=</code></h3>
+<p>Query: <code>search</code> (string, opcional) casa <strong>nome ou e-mail</strong>, parcial e sem diferenciar maiúsculas; <code>page</code> (inteiro). Response <code>200</code>: <code>{ data: User[], total, page, pageSize }</code>.</p>
+<h3><code>POST /users/invite</code></h3>
+<p>Request body:</p>
+<pre><code class="language-json">{ &quot;name&quot;: &quot;Camila Duarte&quot;, &quot;email&quot;: &quot;camila@vetcare.com.br&quot;, &quot;role&quot;: &quot;RECEP&quot; }
+</code></pre>
+<p>Cria o usuário com <code>status: PENDING_INVITE</code> (sem senha) e <code>inviteSentAt = agora</code>, gera um token de convite e envia e-mail com <code>https://vetcare-aal.vercel.app/convite/{token}</code>. Response <code>201</code>: o <code>User</code> criado. E-mail já cadastrado: <code>409</code> <code>{ &quot;message&quot;: &quot;Já existe um usuário com este e-mail.&quot; }</code>.</p>
+<h3><code>POST /users/invite/{token}/accept</code> (público)</h3>
+<p>Request body:</p>
+<pre><code class="language-json">{ &quot;password&quot;: &quot;Senha@Forte1&quot; }
+</code></pre>
+<p>Response <code>200</code> (mesmo formato do login):</p>
+<pre><code class="language-json">{
+  &quot;access_token&quot;: &quot;eyJhbGciOi...&quot;,
+  &quot;user&quot;: {
+    &quot;id&quot;: &quot;uuid&quot;,
+    &quot;name&quot;: &quot;Camila Duarte&quot;,
+    &quot;email&quot;: &quot;camila@vetcare.com.br&quot;,
+    &quot;role&quot;: &quot;RECEP&quot;
+  }
+}
+</code></pre>
+<p>O usuário passa a <code>ACTIVE</code> e o token de convite é invalidado. O front usa o <code>user</code> da resposta para iniciar a sessão, sem chamar <code>GET /users/me</code>. Token inexistente, usado ou expirado: <code>404</code> (ou 400/410) com <code>message</code> em português, ex.: &quot;Convite inválido ou expirado.&quot; Senha fraca: <code>400</code>.</p>
+<h3><code>POST /users/{id}/deactivate</code></h3>
+<p>Sem body. Response <code>200</code> com o <code>User</code> atualizado (<code>status: DEACTIVATED</code>) ou <code>204</code>. O usuário não consegue mais logar (nem usar tokens já emitidos). <strong>Se o usuário tinha um convite pendente, o convite é cancelado</strong>: o link <code>/convite/{token}</code> passa a responder como inválido (<code>404</code>), e o <code>accept</code> não pode reativar o usuário.</p>
+<h3><code>PATCH /users/{id}</code></h3>
+<p>Request body:</p>
+<pre><code class="language-json">{ &quot;name&quot;: &quot;Camila Duarte&quot;, &quot;role&quot;: &quot;ADMIN&quot; }
+</code></pre>
+<p>Atualiza só <code>name</code> e <code>role</code> (e-mail é ignorado, não é editável). Response <code>200</code>: o <code>User</code> atualizado.</p>
+<h2><span class="num">5</span>Tutores (<code>PetOwner</code>) e pets (todas as rotas exigem token; <code>ADMIN</code> e <code>RECEP</code>)</h2>
+<p>O front usa os nomes da API (<code>pet-owners</code>, <code>petOwner</code>, <code>petOwnerId</code>); o texto da interface continua &quot;tutor&quot;.</p>
+<pre><code class="language-json">// PetOwner
+{
+  &quot;id&quot;: &quot;uuid&quot;, &quot;name&quot;: &quot;Maria Silva&quot;, &quot;cpf&quot;: &quot;12345678901&quot;,
+  &quot;phone&quot;: &quot;11999998888&quot;, &quot;email&quot;: &quot;maria@email.com&quot;, &quot;address&quot;: &quot;Rua A, 10&quot;,
+  &quot;pets&quot;: [ /* Pet sem o campo petOwner */ ]
+}
+
+// Pet
+{
+  &quot;id&quot;: &quot;uuid&quot;, &quot;name&quot;: &quot;Mel&quot;, &quot;species&quot;: &quot;CAT&quot;, &quot;breed&quot;: &quot;SRD&quot;, &quot;sex&quot;: &quot;F&quot;,
+  &quot;birthdate&quot;: &quot;2021-07-02&quot;, &quot;weight&quot;: 4.2, &quot;notes&quot;: &quot;Alergia a dipirona&quot;,
+  &quot;petOwner&quot;: { /* PetOwner sem o campo pets */ }
+}
+</code></pre>
+<p><code>notes</code> são alertas clínicos (alergias, doenças crônicas, cuidados no manejo); pode ser string vazia. Para evitar referência circular, <code>PetOwner.pets[]</code> vem sem <code>petOwner</code> e <code>Pet.petOwner</code> vem sem <code>pets</code>.</p>
+<h3>Tutores</h3>
+<table>
+<thead>
+<tr>
+<th>Rota</th>
+<th>Query / Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /pet-owners</code></td>
+<td>Query: <code>search</code>, <code>page</code>. <code>search</code> casa nome, CPF, telefone (também só por dígitos) ou nome de um pet.</td>
+<td><code>200</code> <code>{ data: PetOwner[], total, page, pageSize }</code></td>
+</tr>
+<tr>
+<td><code>POST /pet-owners</code></td>
+<td>Body abaixo</td>
+<td><code>201</code> <code>PetOwner</code> (com <code>pets</code>)</td>
+</tr>
+<tr>
+<td><code>GET /pet-owners/{id}</code></td>
+<td>—</td>
+<td><code>200</code> <code>PetOwner</code> com <code>pets</code>. <code>404</code> se não existe ou foi removido.</td>
+</tr>
+<tr>
+<td><code>PATCH /pet-owners/{id}</code></td>
+<td><code>{ &quot;name&quot;, &quot;phone&quot;, &quot;email&quot;, &quot;address&quot; }</code> (CPF não é editável; ignorar se vier)</td>
+<td><code>200</code> <code>PetOwner</code></td>
+</tr>
+<tr>
+<td><code>DELETE /pet-owners/{id}</code></td>
+<td>—</td>
+<td><code>204</code> (ou <code>200</code>). <strong>Soft delete</strong>, em cascata para os pets do tutor. Some das listas e do <code>GET</code> por id.</td>
+</tr>
+</tbody></table>
+<p>Body do <code>POST /pet-owners</code>:</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;Maria Silva&quot;,
+  &quot;cpf&quot;: &quot;12345678901&quot;,
+  &quot;phone&quot;: &quot;11999998888&quot;,
+  &quot;email&quot;: &quot;maria@email.com&quot;,
+  &quot;address&quot;: &quot;Rua A, 10&quot;,
+  &quot;pets&quot;: [
+    {
+      &quot;name&quot;: &quot;Mel&quot;,
+      &quot;species&quot;: &quot;CAT&quot;,
+      &quot;breed&quot;: &quot;SRD&quot;,
+      &quot;sex&quot;: &quot;F&quot;,
+      &quot;birthdate&quot;: &quot;2021-07-02&quot;,
+      &quot;weight&quot;: 4.2,
+      &quot;notes&quot;: &quot;&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>pets</code> é opcional (omitido quando o usuário não cadastra o primeiro pet). Tutor e pets devem ser criados na mesma transação. <strong>CPF duplicado: <code>409</code></strong> <code>{ &quot;message&quot;: &quot;Já existe um tutor com este CPF.&quot; }</code> (o front exibe o texto da API).</p>
+<h3>Pets</h3>
+<table>
+<thead>
+<tr>
+<th>Rota</th>
+<th>Query / Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /pets</code></td>
+<td>Query: <code>search</code>, <code>page</code>. <code>search</code> casa nome do pet, raça ou nome do tutor.</td>
+<td><code>200</code> <code>{ data: Pet[], total, page, pageSize }</code>, cada pet com <code>petOwner</code></td>
+</tr>
+<tr>
+<td><code>POST /pets</code></td>
+<td><code>{ &quot;name&quot;, &quot;species&quot;, &quot;breed&quot;, &quot;sex&quot;, &quot;birthdate&quot;, &quot;weight&quot;, &quot;notes&quot;, &quot;petOwnerId&quot; }</code></td>
+<td><code>201</code> <code>Pet</code></td>
+</tr>
+<tr>
+<td><code>GET /pets/{id}</code></td>
+<td>—</td>
+<td><code>200</code> <code>Pet</code>. <code>404</code> se não existe ou foi removido.</td>
+</tr>
+<tr>
+<td><code>PATCH /pets/{id}</code></td>
+<td><code>{ &quot;name&quot;, &quot;species&quot;, &quot;breed&quot;, &quot;sex&quot;, &quot;birthdate&quot;, &quot;weight&quot;, &quot;notes&quot; }</code> (o dono não é editável)</td>
+<td><code>200</code> <code>Pet</code></td>
+</tr>
+<tr>
+<td><code>DELETE /pets/{id}</code></td>
+<td>—</td>
+<td><code>204</code> (ou <code>200</code>). Soft delete.</td>
+</tr>
+</tbody></table>
+<p><code>POST /pets</code> com <code>petOwnerId</code> inexistente ou removido: <code>404</code>.</p>
+<h2><span class="num">6</span>O que o back precisa mudar ou criar</h2>
+<h3>Já existe, mas precisa mudar</h3>
+<ol>
+<li><strong>Login:</strong> hoje devolve <code>{ access_token }</code>. Passar a devolver <code>{ access_token, user: { id, name, email, role } }</code>.</li>
+<li><strong>Mensagem de 401:</strong> unificar (hoje há duas versões com capitalização diferente) e bloquear login de usuário desativado ou com convite pendente.</li>
+<li><strong><code>User</code>:</strong> adicionar <code>name</code>, <code>status</code>, <code>lastAccessAt</code>, <code>inviteSentAt</code> e o token de convite. Nas respostas, expor o campo como <code>role</code> (a entidade chama <code>profile</code>; o <code>ResponseUserDto</code> já usa <code>role</code>).</li>
+<li><strong><code>GET /users</code>:</strong> hoje exige <code>VET</code> e devolve uma string. Passar a exigir <code>ADMIN</code>, com busca e paginação. O <code>POST /users</code> atual (cria usuário com senha) não faz parte do contrato; pode ficar só para o seed/uso interno, ou ser removido.</li>
+<li><strong>Schema de tutor/pet:</strong> renomear para <code>PetOwner</code>/<code>Pet</code> e ajustar:<ul>
+<li><code>adress</code> → <code>address</code>;</li>
+<li><code>phone String[]</code> → <code>String</code>;</li>
+<li><code>birth</code> → <code>birthdate</code>;</li>
+<li>adicionar <code>Pet.name</code>, <code>weight</code>, <code>notes</code> e <code>deletedAt</code> (nos dois);</li>
+<li><strong>remover o <code>@unique</code> de <code>Animal.tutorId</code></strong>: hoje um tutor só pode ter um pet;</li>
+<li>enum <code>sex</code>: <code>M</code> / <code>F</code>.</li>
+</ul>
+</li>
+<li><strong>CORS</strong> em <code>main.ts</code> (seção 2).</li>
+<li><strong>Controllers <code>/tutors</code> e <code>/vets</code>:</strong> são scaffolding (retornam texto) e os DTOs estão vazios (com <code>whitelist</code> + <code>forbidNonWhitelisted</code>, qualquer body seria rejeitado). Trocar por <code>/pet-owners</code> e <code>/pets</code>.</li>
+<li><strong>IDs:</strong> nas rotas de users e tutors o código faz <code>+id</code>; os IDs são UUID, então vira <code>NaN</code>. Usar o <code>id</code> como string.</li>
+</ol>
+<h3>Não existe ainda</h3>
+<ul>
+<li><code>GET /users/me</code>.</li>
+<li>Fluxo de convite: <code>POST /users/invite</code>, <code>POST /users/invite/{token}/accept</code> e o envio de e-mail.</li>
+<li><code>POST /users/{id}/deactivate</code> e <code>PATCH /users/{id}</code>.</li>
+<li>Busca, paginação e o envelope <code>{ data, total, page, pageSize }</code>.</li>
+<li>Soft delete com cascata.</li>
+<li>Tradução do erro de CPF duplicado (hoje só existe a constraint <code>unique</code> no banco) para <code>409</code>.</li>
+<li>Validação de senha forte no aceite do convite.</li>
+</ul>
+<h2><span class="num">7</span>Seed (obrigatório, inclusive em produção)</h2>
+<table>
+<thead>
+<tr>
+<th>Perfil</th>
+<th>Nome</th>
+<th>E-mail</th>
+<th>Senha</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ADMIN</code></td>
+<td>Renata Freitas</td>
+<td><code>admin@vetcare.com.br</code></td>
+<td><code>password</code></td>
+</tr>
+<tr>
+<td><code>RECEP</code></td>
+<td>Juliana Prado</td>
+<td><code>recepcao@vetcare.com.br</code></td>
+<td><code>password</code></td>
+</tr>
+</tbody></table>
+<p>Ambos <code>ACTIVE</code>. A senha <code>password</code> não passa na regra de senha forte; por isso o login não valida força. Troque por senhas fortes antes de uso real.</p>
+<h2><span class="num">8</span>Como testar com o front</h2>
+<p>Em <code>vetcare-front</code>, copie <code>.env.example</code> para <code>.env</code> e aponte <code>VITE_API_URL</code> para a API. O MSW (API simulada no navegador) só liga com <code>VITE_ENABLE_MSW=true</code>; em <code>npm run dev</code> ele vem ligado por <code>.env.development</code>, então para usar a API real crie um <code>.env.local</code> com <code>VITE_ENABLE_MSW=false</code>. No Vercel, por enquanto <code>VITE_ENABLE_MSW=true</code> (o front de produção ainda usa a API simulada); quando a API real estiver no ar, troque para <code>false</code> junto com o <code>VITE_API_URL</code>.</p>
+</main></body></html>
