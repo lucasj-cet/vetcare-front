@@ -39,7 +39,6 @@ import {
   ConfirmDialog,
   DataTable,
   FormActions,
-  Kpis,
   PageHeader,
   PersonAvatar,
   Pill,
@@ -69,7 +68,6 @@ export default function Usuarios() {
   const [debounced] = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const q = useUsers({ search: debounced, page });
-  const allTotal = useUsers().data?.total;
 
   const total = q.data?.total ?? 0;
   const pageSize = q.data?.pageSize;
@@ -102,7 +100,6 @@ export default function Usuarios() {
         </Button>
       </PageHeader>
       <div className="stack">
-        <Kpis items={[{ label: "Usuários", value: allTotal ?? "—" }]} />
         <Block flush>
           <Group
             justify="space-between"

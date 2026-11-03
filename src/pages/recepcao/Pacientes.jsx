@@ -23,7 +23,6 @@ import { useEffect, useState } from "react";
 import {
   useDeletePetOwner,
   usePetOwner,
-  usePetOwners,
 } from "../../api/queries/petOwners";
 import { useDeletePet, usePets } from "../../api/queries/pets";
 import {
@@ -38,7 +37,6 @@ import {
   DataTable,
   Empty,
   Facts,
-  Kpis,
   PageHeader,
   PetAvatar,
 } from "../../components/ui";
@@ -78,9 +76,7 @@ export default function Pacientes() {
   });
   const deleting = deletePetOwner.isPending || deletePet.isPending;
 
-  const ownersTotal = usePetOwners().data?.total;
   const pets = usePets({ search: debounced, page });
-  const petsTotal = usePets().data?.total;
 
   const total = pets.data?.total ?? 0;
   const pageSize = pets.data?.pageSize;
@@ -120,13 +116,6 @@ export default function Pacientes() {
       </PageHeader>
 
       <div className="stack">
-        <Kpis
-          items={[
-            { label: "Pacientes", value: petsTotal ?? "—" },
-            { label: "Tutores", value: ownersTotal ?? "—" },
-          ]}
-        />
-
         <Block flush>
           <Group
             justify="space-between"
