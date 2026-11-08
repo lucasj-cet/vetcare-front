@@ -9,7 +9,7 @@ export const fromApiPet = (p) => ({
   species: p.species,
   breed: p.breed,
   sex: p.sex,
-  birth: p.birthdate,
+  birth: p.birthDate,
   weight: p.weight,
   alerts: p.notes,
   ...(p.petOwner && {
