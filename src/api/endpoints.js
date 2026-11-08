@@ -4,7 +4,7 @@ export const ENDPOINTS = {
     me: "/users/me",
     list: "/users",
     invite: "/users/invite",
-    acceptInvite: (token) => `/users/invite/${token}/accept`,
+    acceptInvite: (token) => `/auth/invite/${token}/accept`,
     deactivate: (id) => `/users/${id}/deactivate`,
     byId: (id) => `/users/${id}`,
   },
