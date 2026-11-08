@@ -33,7 +33,7 @@ const toApiNewPet = (p) => ({
   species: p.species,
   breed: p.breed,
   sex: p.sex,
-  birthdate: p.birth,
+  birthDate: p.birth,
   weight: p.weight,
   notes: p.alerts,
 });
