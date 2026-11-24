@@ -63,6 +63,3 @@ Todos os nomes, CPFs, telefones, e-mails e valores são fictícios e precisam se
 dados reais da API. A tabela de preços dos atendimentos (`PRICES` em `src/data/seed.js`) também é
 de exemplo e deve vir do back-end.
 
-## Documento do fluxo
-
-Resumo do fluxo do sistema em PDF: [`docs/VetCare-Fluxo-do-Sistema.pdf`](docs/VetCare-Fluxo-do-Sistema.pdf) (fonte em `docs/fluxo-vetcare.html`).
